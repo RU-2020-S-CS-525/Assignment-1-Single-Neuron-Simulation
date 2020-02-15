@@ -49,12 +49,25 @@ class LIF(object):
             tempVotage = self.votage[i]
         return self.votage, self.spike
 
-    def plot(self):
+    def getFiringNum(self):
+        return np.sum(self.spike, axis = 0)
+
+    def plot(self, currentList):
+        #list currentList: [float current]
         color = ['b', 'g', 'r', 'c', 'm', 'y']
+        if self.simulationNum > len(color):
+            print('E: too many currents')
+            exit(-1)
+
         time = np.array(range(self.stepNum), dtype = np.float64) * self.dt
         for i in range(self.simulationNum):
-            plt.plot(time, self.votage[:, i], c = color[i])
-            plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
+            line, = plt.plot(time, self.votage[:, i], c = color[i])
+            point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
+            line.set_label('I = ' + str(currentList[i]) + 'mA')
+            point.set_label('spiking indicator')
+        plt.xlabel('time (msec)')
+        plt.ylabel('votage (mV)')
+        plt.legend(loc = 2)
         plt.show()
         return
 
@@ -68,18 +81,56 @@ def Q1(currentList, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0
     #float vRest: rest votage V_r
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
-    stepNum = timeWindow / dt
+
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    simulationNum = len(currentList)
+
+    #init input current
+    current = np.empty((stepNum, simulationNum), dtype = np.float64)
+    for i in range(simulationNum):
+        current[:, i] = currentList[i]
+
+    #init LIF model
     lif = LIF(capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
-    current = np.full(stepNum, )
+
+    #simulate
+    lif.simulate(current)
+    lif.plot(currentList)
+    return
+
+def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True):
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    simulationNum = int(np.ceil((maxCurrent - minCurrent) / currentStepSize))
+    currentList = np.array(range(simulationNum), dtype = np.float64) * currentStepSize + minCurrent
+    
+    #init input current
+    current = np.empty((stepNum, simulationNum), dtype = np.float64)
+    for i in range(simulationNum):
+        current[:, i] = currentList[i]
+
+    #init LIF model
+    lif = LIF(capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
+    #simulate
+    lif.simulate(current)
+    rate = lif.getFiringNum() / timeWindow * 1000
+
+    plt.plot(currentList, rate)
+    plt.xlabel('current (mA)')
+    plt.ylabel('firing rate (Hz)')
+    plt.show()
 
 if __name__ == '__main__':
-    capitance = 1
+    currentList = [0.5, 0.8, 1]
+    timeWindow = 1000
+    capitance = 50
     resistance = 8
-    vThreshold = 5
+    vThreshold = 3
     vRest = 1
-    lif = LIF(capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
-    current = np.full((10000, 3), 1, dtype = np.float64)
-    current[:, 1] = 0.8
-    current[:, 2] = 0.5
-    lif.simulate(current)
-    lif.plot()
+    Q1(currentList, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
+
+    minCurrent = 0.1
+    maxCurrent = 1
+    currentStepSize = 0.1
+    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
