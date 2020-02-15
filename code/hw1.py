@@ -27,6 +27,8 @@ class LIF(object):
         #OUT
         #np.ndarray tempVotage, dtype = np.float64, shpape = (1, n): updated membrance potential
         #np.ndarray spike, dtype = np.bool, shpape = (1, n): True: fire; False: not fire
+
+        #dV = (I(t) - frac{v_m (t)}{R_m}) * dt / C_m
         dV = (tempCurrent - self.leakyFactor * tempVotage / self.resistance) * self.dt / self.capitance
         tempVotage = tempVotage + dV
         spike = tempVotage >= self.vThreshold
@@ -94,7 +96,7 @@ def Q1(currentList, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0
     #init LIF model
     lif = LIF(capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
 
-    #simulate
+    #simulate and plot
     lif.simulate(current)
     lif.plot(currentList)
     return
@@ -116,6 +118,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistanc
     lif.simulate(current)
     rate = lif.getFiringNum() / timeWindow * 1000
 
+    #plot
     plt.plot(currentList, rate)
     plt.xlabel('current (mA)')
     plt.ylabel('firing rate (Hz)')
