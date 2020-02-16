@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 class LIF(object):
     #leaky integrate-and-fire model
     #C_m \frac{dV}{dt} = I(t) - frac{V_m (t)}{R_m}
-    def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold = 30, dt = 0.01, leaky = True):
+    def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold = -40, dt = 0.01, leaky = True):
         #float capitance: C_m
         #float resistance: R_m
         #float vRest: rest votage V_r
@@ -94,6 +94,7 @@ class Izhikevich(object):
         self.vThreshold = vThreshold
         self.dt = dt
         self.halfDt = self.dt / 2 #used for update v stably
+        return
 
     def _update(self, tempCurrent, tempVotage, tempU):
         #IN
@@ -164,7 +165,33 @@ class Izhikevich(object):
         plt.show()
         return
         
-
+class HodgkinHuxley(object):
+    #Hodgkin-Huxley model
+    #refer to Hodgkin, A.L. and Huxley, A.F., 1952. A quantitative description of membrane current and its application to conduction and excitation in nerve. The Journal of physiology, 117(4), pp.500-544.
+    #C \times \frac{dv}{dt} = I - g_{Na} m^3 h (V - V_{Na}) - g_{K} n^4 (V - V_{K}) - g_{L} (V - V_{L})
+    #\frac{dm}{dt} = a_m(V) (1 - m) - b_m(V) m
+    #\frac{dh}{dt} = a_h(V) (1 - n) - b_h(V) h
+    #\frac{dn}{dt} = a_n(V) (1 - n) - b_n(V) n
+    #a_m(V) = \frac{0.1 (25 - V)}{\exp(\frac{25 - V}{10}) - 1}
+    #b_m(V) = 4 \exp(\frac{-V}{18})
+    #a_h(V) = 0.07 \exp(\frac{-V}{20})
+    #b_h(V) = \frac{1}{\exp(\frac{30 - V}{10} + 1)}
+    #a_n(V) = \frac{0.01 (10 - V)}{\exp(10 - V) - 1}
+    #b_n(V) = 0.125 \exp(\frac{-V}{80})
+    def __init__(self, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False):
+        super(HodgkinHuxley, self).__init__()
+        self.capitance = capitance
+        self.gK = gK
+        self.gNa = gNa
+        self.gL = gL
+        self.VK = VK
+        self.VNa = VNa
+        self.VL = VL
+        self.dt = dt
+        self.TTX = TTX
+        self.pronase = pronase
+        return
+        
 
 def Q1(currentList, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True):
     #IN
@@ -246,24 +273,24 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 2, vThreshold = 
     return
 
 if __name__ == '__main__':
-    # currentList = [1.45, 1.55, 1.65]
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 30
-    # Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    currentList = [0.3, 0.4, 0.5]
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
     # minCurrent = 0.1
     # maxCurrent = 1
     # currentStepSize = 0.1
     # Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    currentList = [4, 5, 6]
-    timeWindow = 1000
-    a = 0.02
-    b = 0.2
-    c = -65
-    d = 2
-    vThreshold = 30
-    Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
+    # currentList = [4, 5, 6]
+    # timeWindow = 1000
+    # a = 0.02
+    # b = 0.2
+    # c = -65
+    # d = 2
+    # vThreshold = 30
+    # Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
