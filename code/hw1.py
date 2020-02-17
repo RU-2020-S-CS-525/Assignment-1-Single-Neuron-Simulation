@@ -73,7 +73,7 @@ class LIF(object):
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
-        plt.legend(loc = 2)
+        plt.legend(loc = 5)
         plt.show()
         return
 
@@ -163,7 +163,7 @@ class Izhikevich(object):
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
-        plt.legend(loc = 2)
+        plt.legend(loc = 5)
         plt.show()
         return
         
@@ -318,7 +318,7 @@ class HodgkinHuxley(object):
             line.set_label('I = ' + str(currentList[i]) + 'mA')
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
-        plt.legend(loc = 2)
+        plt.legend(loc = 5)
         plt.show()
         return    
 
@@ -482,7 +482,7 @@ def Q6(current, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -1
     line.set_label('pronase')
     plt.xlabel('time (msec)')
     plt.ylabel('votage (mV)')
-    plt.legend(loc = 2)
+    plt.legend(loc = 5)
     plt.show()
 
 
@@ -520,7 +520,7 @@ if __name__ == '__main__':
     # VL = 10.6
     # Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
 
-    current = 5
+    current = 0.5
     timeWindow = 25
     capitance = 1
     gK = 36
