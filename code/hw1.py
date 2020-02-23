@@ -171,7 +171,7 @@ class Izhikevich(object):
         
 class HodgkinHuxley(object):
     #Hodgkin-Huxley model
-    #refer to Hodgkin, A.L. and Huxley, A.F., 1952. A quantitative description of membrane current and its application to conduction and excitation in nerve. The Journal of physiology, 117(4), pp.500-544.
+    #refer to Handout
     #C \times \frac{dv}{dt} = I - g_{Na} m^3 h (V - V_{Na}) - g_{K} n^4 (V - V_{K}) - g_{L} (V - V_{L})
     #\frac{dm}{dt} = a_m(V) (1 - m) - b_m(V) m
     #\frac{dh}{dt} = a_h(V) (1 - n) - b_h(V) h
@@ -182,7 +182,7 @@ class HodgkinHuxley(object):
     #b_h(V) = \frac{1}{\exp(\frac{30 - V}{10} + 1)}
     #a_n(V) = \frac{0.01 (10 - V)}{\exp(10 - V) - 1}
     #b_n(V) = 0.125 \exp(\frac{-V}{80})
-    def __init__(self, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False):
+    def __init__(self, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65):
         #float capitance: C_m
         #float gK: maximum conductance for K
         #float gNa: maximum conductance for Na
@@ -193,27 +193,58 @@ class HodgkinHuxley(object):
         #float dt: simulation step size, msec
         #bool TTX: True: use drug TTX; False: not use
         #bool pronase: True: use drug pronase; False: not use
+        #float VBase: baseline votage
         super(HodgkinHuxley, self).__init__()
         self.capitance = capitance
         self.gK = gK
         self.gNa = gNa
         self.gL = gL
-        self.VK = VK
-        self.VNa = VNa
-        self.VL = VL
+        self.VK = VK + VBase
+        self.VNa = VNa + VBase
+        self.VL = VL + VBase
         self.dt = dt
         self.TTX = TTX
         self.pronase = pronase
+        self.VBase = VBase
 
         #init cell
         #float vRest: rest votage V_r
         #float mInit: gating variable for Na activation gate
         #float hInit: gating variable for Na inactivation gate
         #float nInit: gating variable for K activation gate
-        self.vRest = 0
+        self.vRest = 0 + VBase
         self.mInit = 0.05
         self.hInit = 0.60
         self.nInit = 0.32
+
+
+        aMParameter = (0.1, 25, 10, 1)
+        bMParameter = (4, 0, 18)
+        aHParameter = (0.07, 0, 20)
+        bHParameter = (1, 30, 10, -1)
+        aNParameter = (0.01, 10, 10, 1)
+        bNParameter = (0.125, 0, 80)
+        self.aMPA = aMParameter[0]
+        self.aMPB = aMParameter[1] + self.VBase
+        self.aMPC = aMParameter[2]
+        self.aMPD = aMParameter[3]
+        self.bMPA = bMParameter[0]
+        self.bMPB = bMParameter[1] + self.VBase #I believe there is a typo in handout
+        self.bMPC = bMParameter[2]
+        self.aHPA = aHParameter[0]
+        self.aHPB = aHParameter[1] + self.VBase
+        self.aHPC = aHParameter[2]
+        self.bHPA = bHParameter[0]
+        self.bHPB = bHParameter[1] + self.VBase
+        self.bHPC = bHParameter[2]
+        self.bHPD = bHParameter[3]
+        self.aNPA = aNParameter[0]
+        self.aNPB = aNParameter[1] + self.VBase
+        self.aNPC = aNParameter[2]
+        self.aNPD = aNParameter[3]
+        self.bNPA = bNParameter[0]
+        self.bNPB = bNParameter[1] + self.VBase
+        self.bNPC = bNParameter[2]
         return
 
     def _update(self, tempCurrent, tempVotage, tempM, tempH, tempN):
@@ -232,15 +263,15 @@ class HodgkinHuxley(object):
 
 
         #compute a, b
-        aM = 0.1 * (25 - tempVotage) / (np.exp((25 - tempVotage) / 10) - 1)
-        bM = 4 * np.exp(-1 * tempVotage / 18)
+        aM = self.aMPA * (self.aMPB - tempVotage) / (np.exp((self.aMPB - tempVotage) / self.aMPC) - self.aMPD)
+        bM = self.bMPA * np.exp((self.bMPB - tempVotage) / self.bMPC)
         if self.pronase:
             tempH = 1
         else:
-            aH = 0.07 * np.exp(-1 * tempVotage / 20)
-            bH = 1 / (np.exp((30 - tempVotage) / 10) + 1)
-        aN = 0.01 * (10 - tempVotage) / (np.exp(10 - tempVotage) / 10 - 1)
-        bN = 0.125 * np.exp(-1 * tempVotage / 80)
+            aH = self.aHPA * np.exp((self.aHPB - tempVotage) / self.aHPC)
+            bH = self.bHPA / (np.exp((self.bHPB - tempVotage) / self.bHPC) - self.bHPD)
+        aN = self.aNPA * (self.aNPB - tempVotage) / (np.exp((self.aNPB - tempVotage) / self.aNPC) - self.aNPD)
+        bN = self.bNPA * np.exp((self.bNPB - tempVotage) / self.bNPC)
 
         #update V, m, h, n
         IK = self.gK * np.power(tempN, 4) * (tempVotage - self.VK)
@@ -307,8 +338,10 @@ class HodgkinHuxley(object):
             tempVotage = self.votage[i]
         return self.votage
 
-    def plot(self, currentList):
+    def plot(self, currentList, halfInputFlag = False):
+        #IN
         #list currentList: [float current]
+        #bool halfInputFlag: change the title; True: plot for EX4, False: general plot
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
             print('E: too many currents')
@@ -321,7 +354,10 @@ class HodgkinHuxley(object):
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
         plt.legend(loc = 5)
-        plt.title('membrane potential')
+        if halfInputFlag:
+            plt.title('membrane potential when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
+        else:
+            plt.title('membrane potential')
         plt.show()
         return    
 
@@ -419,7 +455,7 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 
     izhikevich.plot(currentList)
     return
 
-def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False):
+def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -433,6 +469,7 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #float dt: simulation step size, msec
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
+    #float VBase: baseline votage
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -444,14 +481,14 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         current[:, i] = currentList[i]
 
     #init HH model
-    HH = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX, pronase)
+    HH = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX, pronase, VBase = VBase)
 
     #simulate and plot
     HH.simulate(current)
     HH.plot(currentList)
     return
 
-def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01):
+def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, VBase = -65):
     #IN
     #float initCurrent: input current
     #float timeWindow: simulation time, msec
@@ -463,15 +500,16 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #flaot VNa: equilibrium potential for Na
     #float VL: equilibrium potential for other linear ions
     #float dt: simulation step size, msec
+    #float VBase: baseline votage
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
     current = np.full((stepNum, 1), initCurrent, dtype = np.float64)
 
     #init HH model
-    HH0 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = False, pronase = False)
-    HH1 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = True, pronase = False)
-    HH2 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = False, pronase = True)
+    HH0 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = False, pronase = False, VBase = VBase)
+    HH1 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = True, pronase = False, VBase = VBase)
+    HH2 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = False, pronase = True, VBase = VBase)
 
     #simulate
     v0 = HH0.simulate(current)
@@ -615,6 +653,39 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.show()
     return
 
+def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65):
+    #IN
+    #list currentList: [float current]
+    #float timeWindow: simulation time
+    #float capitance: C_m
+    #float gK: maximum conductance for K
+    #float gNa: maximum conductance for Na
+    #float gL: maximum conductance for other linear ions
+    #float VK: equilibrium potential for K
+    #flaot VNa: equilibrium potential for Na
+    #float VL: equilibrium potential for other linear ions
+    #float dt: simulation step size, msec
+    #bool TTX: True: use drug TTX; False: not use
+    #bool pronase: True: use drug pronase; False: not use
+    #float VBase: baseline votage
+
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    simulationNum = len(currentList)
+
+    #init input current
+    current = np.zeros((stepNum, simulationNum), dtype = np.float64)
+    for i in range(simulationNum):
+        current[: (stepNum // 2), i] = currentList[i]
+
+    #init HH model
+    HH = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX, pronase, VBase = VBase)
+
+    #simulate and plot
+    HH.simulate(current)
+    HH.plot(currentList, halfInputFlag = True)
+    return
+
 
 if __name__ == '__main__':
     currentList = [0.3, 0.4, 0.5]
@@ -644,7 +715,7 @@ if __name__ == '__main__':
     vThreshold = 30
     Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
 
-    currentList = [-1, 5, 9]
+    currentList = [2, 5, 9]
     timeWindow = 25
     capitance = 1
     gK = 36
@@ -655,7 +726,7 @@ if __name__ == '__main__':
     VL = 10.6
     Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
 
-    current = 0.5
+    current = 5
     timeWindow = 25
     capitance = 1
     gK = 36
@@ -691,3 +762,14 @@ if __name__ == '__main__':
     vRest = -65
     vThreshold = 5
     EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+
+    currentList = [-10, 5, 9]
+    timeWindow = 50
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
