@@ -69,11 +69,12 @@ class LIF(object):
         for i in range(self.simulationNum):
             line, = plt.plot(time, self.votage[:, i], c = color[i])
             point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
-            line.set_label('I = ' + str(currentList[i]) + 'mA')
+            line.set_label('I = ' + str(currentList[i]) + ' mA')
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
         plt.legend(loc = 5)
+        plt.title('membrane potential and spiking behavior')
         plt.show()
         return
 
@@ -81,7 +82,7 @@ class Izhikevich(object):
     #Izhikevich model
     #frac{dv}{dt} = 0.04 v^2 + 5 v + 140 - u + I
     #frac{du}{dt} = a (b v - u)
-    def __init__(self, a = 0.02, b = 0.2, c = -65, d = 2, vThreshold = 30, dt = 0.01):
+    def __init__(self, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 30, dt = 0.01):
         #float a: time scale of u
         #float b: sensitivity of u to v
         #float c: after-spike reset v
@@ -159,11 +160,12 @@ class Izhikevich(object):
         for i in range(self.simulationNum):
             line, = plt.plot(time, self.votage[:, i], c = color[i])
             point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
-            line.set_label('I = ' + str(currentList[i]) + 'mA')
+            line.set_label('I = ' + str(currentList[i]) + ' mA')
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
         plt.legend(loc = 5)
+        plt.title('membrane potential and spiking behavior')
         plt.show()
         return
         
@@ -315,22 +317,23 @@ class HodgkinHuxley(object):
         time = np.array(range(self.stepNum), dtype = np.float64) * self.dt
         for i in range(self.simulationNum):
             line, = plt.plot(time, self.votage[:, i], c = color[i])
-            line.set_label('I = ' + str(currentList[i]) + 'mA')
+            line.set_label('I = ' + str(currentList[i]) + ' mA')
         plt.xlabel('time (msec)')
         plt.ylabel('votage (mV)')
         plt.legend(loc = 5)
+        plt.title('membrane potential')
         plt.show()
         return    
 
 
-def Q1(currentList, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True):
+def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vThreshold: threshold votage V_t
     #float vRest: rest votage V_r
+    #float vThreshold: threshold votage V_t
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
 
@@ -344,21 +347,23 @@ def Q1(currentList, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0
         current[:, i] = currentList[i]
 
     #init LIF model
-    lif = LIF(capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True)
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
     #simulate and plot
     lif.simulate(current)
     lif.plot(currentList)
     return
 
-def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vThreshold, vRest, dt = 0.01, leaky = True):
+def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True):
     #IN
-    #list currentList: [float current]
+    #float minCurrent: minimum input current
+    #float maxCurrent: maximum input current
+    #float currentStepSize: increasing step for input current
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vThreshold: threshold votage V_t
     #float vRest: rest votage V_r
+    #float vThreshold: threshold votage V_t
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
 
@@ -373,7 +378,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistanc
         current[:, i] = currentList[i]
 
     #init LIF model
-    lif = LIF(capitance, resistance, vThreshold, vRest, dt, leaky)
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky)
     #simulate
     lif.simulate(current)
     rate = lif.getFiringNum() / timeWindow * 1000
@@ -382,10 +387,11 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistanc
     plt.plot(currentList, rate)
     plt.xlabel('current (mA)')
     plt.ylabel('firing rate (Hz)')
+    plt.title('firing rate vs. input current')
     plt.show()
     return
 
-def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 2, vThreshold = 30, dt = 0.01):
+def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 30, dt = 0.01):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -445,10 +451,10 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     HH.plot(currentList)
     return
 
-def Q6(current, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01):
+def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01):
     #IN
-    #float current: input current
-    #float timeWindow: simulation time
+    #float initCurrent: input current
+    #float timeWindow: simulation time, msec
     #float capitance: C_m
     #float gK: maximum conductance for K
     #float gNa: maximum conductance for Na
@@ -460,7 +466,7 @@ def Q6(current, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -1
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
-    current = np.full((stepNum, 1), current, dtype = np.float64)
+    current = np.full((stepNum, 1), initCurrent, dtype = np.float64)
 
     #init HH model
     HH0 = HodgkinHuxley(capitance, gK, gNa, gL, VK, VNa, VL, dt, TTX = False, pronase = False)
@@ -474,51 +480,180 @@ def Q6(current, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -1
 
     time = np.array(range(stepNum), dtype = np.float64) * dt
 
-    line, = plt.plot(time, v0, c = 'b')
+    line, = plt.plot(time, v0[:, 0], c = 'b')
     line.set_label('no drug')
-    line, = plt.plot(time, v1, c = 'g')
+    line, = plt.plot(time, v1[:, 0], c = 'g')
     line.set_label('TTX')
-    line, = plt.plot(time, v2, c = 'r')
+    line, = plt.plot(time, v2[:, 0], c = 'r')
     line.set_label('pronase')
     plt.xlabel('time (msec)')
     plt.ylabel('votage (mV)')
     plt.legend(loc = 5)
+    plt.title('membrane potential when I = ' + str(initCurrent) + ' mA')
     plt.show()
+    return
+
+
+def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01):
+    #for comparing membrane potential of IF and LIF
+    #IN
+    #float initCurrent: input current
+    #float timeWindow: simulation time
+    #float capitance: C_m
+    #float resistance: R_m
+    #float vRest: rest votage V_r
+    #float vThreshold: threshold votage V_t
+    #float dt: simulation step size, msec
+
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    current = np.full((stepNum, 1), initCurrent, dtype = np.float64)
+
+    #init LIF and IF model
+    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = False)
+
+    #simulate and plot
+    v1, s1 = lif1.simulate(current)
+    v2, s2 = lif2.simulate(current)
+
+    #plot
+    time = np.array(range(stepNum), dtype = np.float64) * dt
+
+    line, = plt.plot(time, v1, c = 'b')
+    point = plt.scatter(time[s1[:, 0]], np.full(np.sum(s1[:, 0]), vThreshold, dtype = np.float64), c = 'b', marker = 'o')
+    line.set_label('LIF')
+    point.set_label('LIF')
+    line, = plt.plot(time, v2, c = 'g')
+    point = plt.scatter(time[s2[:, 0]], np.full(np.sum(s2[:, 0]), vThreshold, dtype = np.float64), c = 'g', marker = 'o')
+    line.set_label('IF')
+    point.set_label('IF')
+    plt.xlabel('time (msec)')
+    plt.ylabel('votage (mV)')
+    plt.title('membrane potential and spiking behavior when I = ' + str(initCurrent) + ' mA')
+    plt.legend(loc = 5)
+    plt.show()
+    return
+
+def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01):
+    #for comparing firing rate of IF and LIF
+    #IN
+    #float minCurrent: minimum input current
+    #float maxCurrent: maximum input current
+    #float currentStepSize: increasing step for input current
+    #float timeWindow: simulation time
+    #float capitance: C_m
+    #float resistance: R_m
+    #float vRest: rest votage V_r
+    #float vThreshold: threshold votage V_t
+    #float dt: simulation step size, msec
+
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    simulationNum = int(np.ceil((maxCurrent - minCurrent) / currentStepSize))
+    currentList = np.array(range(simulationNum), dtype = np.float64) * currentStepSize + minCurrent
+    
+    #init input current
+    current = np.empty((stepNum, simulationNum), dtype = np.float64)
+    for i in range(simulationNum):
+        current[:, i] = currentList[i]
+
+    #init LIF and IF model
+    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = False)
+
+    #simulate
+    lif1.simulate(current)
+    rate1 = lif1.getFiringNum() / timeWindow * 1000
+    lif2.simulate(current)
+    rate2 = lif2.getFiringNum() / timeWindow * 1000
+
+    #plot
+    line, = plt.plot(currentList, rate1)
+    line.set_label('LIF')
+    line, = plt.plot(currentList, rate2)
+    line.set_label('IF')
+    plt.xlabel('current (mA)')
+    plt.ylabel('firing rate (Hz)')
+    plt.legend(loc = 5)
+    plt.title('firing rate vs. input current')
+    plt.show()
+    return
+
+def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01):
+    #for finding dominant term
+    #IN
+    #float initCurrent: input current
+    #float timeWindow: simulation time
+    #float capitance: C_m
+    #float resistance: R_m
+    #float vRest: rest votage V_r
+    #float vThreshold: threshold votage V_t
+    #float dt: simulation step size, msec
+
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    current = np.full((stepNum, 1), initCurrent, dtype = np.float64)
+
+    #init LIF
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+
+    #simulate and plot
+    v1, s1 = lif.simulate(current)
+
+    #plot
+    time = np.array(range(stepNum), dtype = np.float64) * dt
+
+    line, = plt.plot(time, v1, c = 'b')
+    line.set_label('V_m')
+    line, = plt.plot(time, resistance * current, c = 'g')
+    line.set_label('R_m * I')
+    plt.xlabel('time (msec)')
+    plt.ylabel('votage (mV)')
+    plt.title('terms in LIF model when I = ' + str(initCurrent) + ' mA')
+    plt.legend(loc = 5)
+    plt.show()
+    return
 
 
 if __name__ == '__main__':
-    # currentList = [0.3, 0.4, 0.5]
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    currentList = [0.3, 0.4, 0.5]
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    # minCurrent = 0.1
-    # maxCurrent = 1
-    # currentStepSize = 0.1
-    # Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    minCurrent = 0.1
+    maxCurrent = 10
+    currentStepSize = 0.1
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    # currentList = [4, 5, 6]
-    # timeWindow = 1000
-    # a = 0.02
-    # b = 0.2
-    # c = -65
-    # d = 2
-    # vThreshold = 30
-    # Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
+    currentList = [4, 5, 6]
+    timeWindow = 1000
+    a = 0.02
+    b = 0.2
+    c = -65
+    d = 8
+    vThreshold = 30
+    Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
 
-    # currentList = [-1, 5, 9]
-    # timeWindow = 25
-    # capitance = 1
-    # gK = 36
-    # gNa = 120
-    # gL = 0.3
-    # VK = -12
-    # VNa = 115
-    # VL = 10.6
-    # Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
+    currentList = [-1, 5, 9]
+    timeWindow = 25
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
 
     current = 0.5
     timeWindow = 25
@@ -530,3 +665,29 @@ if __name__ == '__main__':
     VNa = 115
     VL = 10.6
     Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01)
+
+    current = 0.26
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+
+    minCurrent = 0.1
+    maxCurrent = 10
+    currentStepSize = 0.1
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+
+    current = 0.26
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
