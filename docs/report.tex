@@ -93,6 +93,8 @@
 		
 		See Figure \ref{fig:Fig4.sub.H-H} and \ref{fig:Fig4.sub.Neg_H-H}. The typical value is that $\bar{g_k} = 36$, $\bar{g_{na}} = 120$, $\bar{g_l} = 0.3$, $V_k = -12$, $V_{na} = 115$, $V_l = 10.6$.
 		
+		An interesting phenomena is the rebound spike (Figure \ref{fig:Fig4.sub.Neg_H-H}). After an inhibitory current $(I < 0)$ switched off, it emits a spike. 
+		
 		\begin{figure}[ht]
 			\centering
 			\subfigure[Hodgkin-Huxley]{
@@ -108,11 +110,13 @@
 		
 		TTX:
 		
-		Because TTX will inhibit the sodium current, sodium particle can not enter or exit the neuron. This situation is equal to closing all the sodium channel. Therefore, we can set 0 for $g_{na}m^3h(V-V_na)$ to simulate the effect of TTX. See the green curve in \ref{fig:fig5}.
+		Because TTX will inhibit the sodium current, sodium particle can not enter or exit the neuron. This situation is equal to closing all the sodium channel. Therefore, we can set 0 for $g_{na}m^3h(V-V_na)$ to simulate the effect of TTX. See the green curve in \ref{fig:fig5}. Note that if we inject a large enough current abruptly, like 100 mA, the potential of this neuron will perform a spike-like curve. However, this is caused by the input current, which greatly breaks the equilibrium potential. Potassium channels take time to react to this large input current, and before potassium channels open, the input current integrates like a spike.
 		
 		Pronase:
 		
-		Pronase will eliminate the sodium inactivation. Therefore, all inactivation gate will keep open. So, we can fixed $h$ to 1 to simulate this effect. See the red curve in \ref{fig:fig5}.
+		According to the ball and chain inactivation, a sodium channel can be in three states: open, closed, or inactivated. Both closed and inactivated states inhibit the sodium current. Therefore, we can consider that the parameter h describes the proportion of channels in the activated (open or closed) state, and m describes the proportion of active channels in open state. Since Pronase eliminates the sodium inactivation, all channels will be in an activated state. Therefore, we can fix h to 1 to simulate this effect. See the red curve in Figure \ref{fig:fig5}. Notice that the potential will keep in a high value, which causes long-lasting firing.
+		
+		Notice that the derivative of m is negative when the potential is relatively small. Therefore, to stop a long-lasting firing, a neuron have to inhibit sodium entering and keep potassium exiting. Sodium channels are directly blocked in the inactivated state regardless of its open/closed state, which helps to stop firing.
 		
 		\begin{figure}[ht]
 			\centering
