@@ -24,19 +24,19 @@
 	\begin{enumerate}
 		\item what do you expect to happen if an IF neuron is constantly fed a very low input current? An LIF neuron?
 		
-		IF: Because the neuron continually integrates input, its membrane potential $V$ will constantly grow up. Finally, $V$ will reach the threshold $V_{threshold}$ and the neuron will fire.
+		IF: See Figure \ref{fig:Fig1.sub.L}. Because the neuron continually integrates input, its membrane potential $V_m$ will constantly grow up. Finally, $V_m$ will reach the threshold $V_{threshold}$. Then, the neuron will fire and reset $V_m$.
 		
-		LIF: The potential is dominated by current "leak" which tend to set the voltage to 0. So, the voltage will increase from $-65$ to $0$ at the begin. Then, the input will be counteracted by "leak" and voltage will converge to $0$.
+		LIF: See Figure\ref{fig:Fig1.sub.L}. At the beginning, because the input current $I$ is far smaller than $-V_m/R_m$, voltage is dominated by "leak", the voltage will increase steeply from $V_{rest}$. Then, as voltage $V_m$ increasing, $-V_m/R_m$ will decrease and be close or equal to the input current $I$. So, $dV/dt$ will be close to 0. Because the input can not exceed the threshold $V_m/R_m$, it will be leaked out. Therefore, finally the voltage will converge to $R_mI$, where $dV/dt = 0$. Also, because $I < V_{threshold}/R_m$, this neuron will never fire.
 		
 		\item what do you expect to happen if an IF neuron is constantly fed a large input current? An LIF neuron?
 			
-		IF: Neuron will fire and reset its membrane potential in a very high frequency.
+		IF: See Figure \ref{fig:Fig1.sub.H}\ref{fig:Fig1.sub.I}. Because the input current is large, the ?gradient? of voltage is also large. Therefore, neuron will fire and reset in a very high frequency.
 		
-		LIF: Neuron will have a similar performance as IF. Because the membrane potential is dominated by input current, and the current "leak" can not counteract the input.
+		LIF: See Figure \ref{fig:Fig1.sub.H}\ref{fig:Fig1.sub.I}. Because the input current $I$ is very large, the current "leak" can not counteract the input. Therefore, the membrane potential is dominated by input current, and the neuron has a similar performance as IF. However, LIF model still fire in a higher frequency than IF model. This is because the "leak term" $V_m/R_m$ accelerates the increasing of voltage when the voltage is negative.
 		
 		\item What are the limitations of an LIF neuron?
 			
-		The LIF neuron can't handle large input. In this situation, LIF will be similar with IF that the firing rate is linear correlation with input current. See \ref{fig:Fig1.sub.I}
+		The LIF neuron can't handle large input. See \ref{fig:Fig1.sub.I}, when input current is large, the "leak term" of LIF model lost its function, and LIF will have a similar performance as IF. ?all spikes are the same?
 		
 			\begin{figure}[htb]
 			\centering
@@ -58,13 +58,13 @@
 	\begin{enumerate}
 		\item Simulate an LIF neuron with different input currents and plot the membrane potential, showing (a) potential decay over time and (b) spiking behavior.
 
-		See \ref{fig:Fig2.sub.voltage}.
+		See \ref{fig:Fig2.sub.voltage}. The typical value we use is $V_{rest} = -65$, $V_{threshold} = 5$, $C_m = 1$, and $R_m = 20$.
 		
 		\item Plot the firing rate as a function of the input current.
 		
 		See \ref{fig:Fig2.sub.voltage}.
 		
-		\begin{figure}[ht]
+		\begin{figure}[htb]
 			\centering
 			\subfigure[Potential]{
 			\label{fig:Fig2.sub.voltage}
@@ -77,21 +77,23 @@
 		
 		\item What happens to the firing rate as you continue to increase the input current? Why?
 		
-		See \ref{fig:Fig2.sub.fire_rate}, when the current is small, the firing rate will increase steeply as increasing current. This is because ?. As input current increasing, because the potential will be reseted to $V_{rest}$ after firing, $R_mI$ will be far larger than $V$. In this case, the potential will be dominated by input current, and the firing rate will be linear correlation with input current.
+		See \ref{fig:Fig2.sub.fire_rate}. When the input current is very small $I < V_{threshold}/R_m$, the neuron doesn't fire. Then, as the current increasing, the firing rate will increase steeply. This is because ?. As input current increasing, because the potential will be reseted to $V_{rest}$ after firing, $R_mI$ will be far larger than $V$. In this case, the potential will be dominated by input current, and the firing rate will be linear correlation with input current.
 		
 		\item Simulate a neuron using the Izhikevich model.
 		
-		See \ref{fig:Fig3.sub.Izh}.
+		See \ref{fig:Fig4.sub.Izh}. The typical value is that $a = 0.02$, $b - 0.2$, $c - -65$, $d = 8$, and $V_{threshold} = 30$.
+		
 		\item Simulate a neuron using the Hodgkin-Huxley model.
 		
-		See \ref{fig:Fig3.sub.H-H}.
-		\begin{figure}[ht]
+		See \ref{fig:Fig4.sub.H-H}. The typical value is that $\bar{g_k} = 36$, $\bar{g_{na}} = 120$, $\bar{g_l} = 0.3$, $V_k = -12$, $V_{na} = 115$, $V_l = 10.6$.
+		
+		\begin{figure}[htb]
 			\centering
 			\subfigure[Izhikevich]{
-			\label{fig:Fig3.sub.Izh}
+			\label{fig:Fig4.sub.Izh}
 			\includegraphics[scale=0.3]{plot_programming_4.png}}
 			\subfigure[Hodgkin-Huxley]{
-			\label{fig:Fig3.sub.H-H}
+			\label{fig:Fig4.sub.H-H}
 			\includegraphics[scale=0.3]{plot_programming_5.png}}
 			\caption{Izhikevich and Hodgkin-Huxley}
 		\end{figure}
@@ -104,11 +106,11 @@
 		
 		Pronase:
 		
-		Pronase will eliminate the sodium inactivation, which means all inactivation gate will be open. So, we can fixed $h$ to 1 to simulate the effect. See the red curve in \ref{fig:fig5}.
+		Pronase will eliminate the sodium inactivation. Therefore, all inactivation gate will keep open. So, we can fixed $h$ to 1 to simulate this effect. See the red curve in \ref{fig:fig5}.
 		
-		\begin{figure}[ht]
+		\begin{figure}[htb]
 			\centering
-			\includegraphics[scale=0.3]{plot_programming_6.png}
+			\includegraphics[scale=0.3]{plot_programming_7.png}
 			\caption{TTX and pronase}
 			\label{fig:fig5}
 		\end{figure}
