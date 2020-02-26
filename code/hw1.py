@@ -207,13 +207,7 @@ class HodgkinHuxley(object):
         self.pronase = pronase
         self.VBase = VBase
 
-        #init cell
-        #float vRest: rest votage V_r
-        #float mInit: gating variable for Na activation gate
-        #float hInit: gating variable for Na inactivation gate
-        #float nInit: gating variable for K activation gate
-
-
+        #define channel parameters
         aMParameter = (0.1, 25, 10, 1)
         bMParameter = (4, 0, 18)
         aHParameter = (0.07, 0, 20)
@@ -242,7 +236,11 @@ class HodgkinHuxley(object):
         self.bNPB = bNParameter[1] + self.VBase
         self.bNPC = bNParameter[2]
 
-
+        #init cell
+        #float vRest: rest votage V_r
+        #float mInit: gating variable for Na activation gate
+        #float hInit: gating variable for Na inactivation gate
+        #float nInit: gating variable for K activation gate
         self.vRest = 0 + VBase
         aM = self.aMPA * (self.aMPB - self.vRest) / (np.exp((self.aMPB - self.vRest) / self.aMPC) - self.aMPD)
         bM = self.bMPA * np.exp((self.bMPB - self.vRest) / self.bMPC)
@@ -250,10 +248,9 @@ class HodgkinHuxley(object):
         bH = self.bHPA / (np.exp((self.bHPB - self.vRest) / self.bHPC) - self.bHPD)
         aN = self.aNPA * (self.aNPB - self.vRest) / (np.exp((self.aNPB - self.vRest) / self.aNPC) - self.aNPD)
         bN = self.bNPA * np.exp((self.bNPB - self.vRest) / self.bNPC)
-        self.mInit = aM/(aM+bM)
-        self.hInit = aH/(aH+bH)
-        self.nInit = aN/(aN+bN)
-        print(self.mInit, self.hInit, self.nInit)
+        self.mInit = aM / (aM + bM)
+        self.hInit = aH / (aH + bH)
+        self.nInit = aN / (aN + bN)
         return
 
     def _update(self, tempCurrent, tempVotage, tempM, tempH, tempN):
@@ -697,80 +694,80 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
 
 
 if __name__ == '__main__':
-    # currentList = [0.3, 0.4, 0.5]
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.1, leaky = True)
-    #
-    # minCurrent = 0.1
-    # maxCurrent = 3
-    # currentStepSize = 0.1
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
-    # #
-    # currentList = [4, 5, 6]
-    # timeWindow = 500
-    # a = 0.02
-    # b = 0.2
-    # c = -65
-    # d = 8
-    # vThreshold = 30
-    # Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
+    currentList = [0.3, 0.4, 0.5]
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    # currentList = [-10, 2, 5, 9]
-    # timeWindow = 50
-    # capitance = 1
-    # gK = 36
-    # gNa = 120
-    # gL = 0.3
-    # VK = -12
-    # VNa = 115
-    # VL = 10.6
-    # Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
+    minCurrent = 0.1
+    maxCurrent = 3
+    currentStepSize = 0.1
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    # current = 5
-    # timeWindow = 25
-    # capitance = 1
-    # gK = 36
-    # gNa = 120
-    # gL = 0.3
-    # VK = -12
-    # VNa = 115
-    # VL = 10.6
-    # Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01)
+    currentList = [4, 5, 6]
+    timeWindow = 500
+    a = 0.02
+    b = 0.2
+    c = -65
+    d = 8
+    vThreshold = 30
+    Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
 
-    # current = 200
-    # timeWindow = 10
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
-    #
-    # minCurrent = 0.1
-    # maxCurrent = 3
-    # currentStepSize = 0.1
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
-    #
-    # current = 0.26
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    currentList = [-10, 2, 5, 9]
+    timeWindow = 50
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
+
+    current = 5
+    timeWindow = 25
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01)
+
+    current = 200
+    timeWindow = 10
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    
+    minCurrent = 0.1
+    maxCurrent = 3
+    currentStepSize = 0.1
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    
+    current = 0.26
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
 
     currentList = [-9, 5, 9]
     timeWindow = 50
