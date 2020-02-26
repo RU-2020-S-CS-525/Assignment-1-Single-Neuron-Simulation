@@ -7,8 +7,8 @@ class LIF(object):
     def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold = 5, dt = 0.01, leaky = True):
         #float capitance: C_m
         #float resistance: R_m
-        #float vRest: rest votage V_r
-        #float vThreshold: threshold votage V_t
+        #float vRest: rest voltage V_r
+        #float vThreshold: threshold voltage V_t
         #float dt: simulation step size, msec
         #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
         super(LIF, self).__init__()
@@ -20,40 +20,40 @@ class LIF(object):
         self.leakyFactor = 1 if leaky else 0
         return
 
-    def _update(self, tempCurrent, tempVotage):
+    def _update(self, tempCurrent, tempVoltage):
         #IN
         #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input current
-        #np.ndarray tempVotage, dtype = np.float64, shape = (1, n): n different membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potential
         #OUT
-        #np.ndarray tempVotage, dtype = np.float64, shpape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shpape = (1, n): updated membrance potential
         #np.ndarray spike, dtype = np.bool, shpape = (1, n): True: fire; False: not fire
 
         #dV = (I(t) - frac{v_m (t)}{R_m}) * dt / C_m
-        dV = (tempCurrent - self.leakyFactor * tempVotage / self.resistance) * self.dt / self.capitance
-        tempVotage = tempVotage + dV
+        dV = (tempCurrent - self.leakyFactor * tempVoltage / self.resistance) * self.dt / self.capitance
+        tempVoltage = tempVoltage + dV
 
         #get spike and reset
-        spike = tempVotage >= self.vThreshold
-        tempVotage[spike] = self.vRest
-        return tempVotage, spike
+        spike = tempVoltage >= self.vThreshold
+        tempVoltage[spike] = self.vRest
+        return tempVoltage, spike
 
     def simulate(self, current):
         #IN
         #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents
         #OUT
-        #np.ndarray votage, dtype = np.float64, shape = (k, n): membrance potential
+        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential
         #np.ndarray spike, dtype = np.bool, shape = (k, n): spiking behavior
-        self.votage = np.empty_like(current, dtype = np.float64)
+        self.voltage = np.empty_like(current, dtype = np.float64)
         self.spike = np.empty_like(current, dtype = np.bool)
         self.stepNum, self.simulationNum = current.shape
         
         #init v
-        tempVotage = np.full((1, self.simulationNum), self.vRest, dtype = np.float64)
+        tempVoltage = np.full((1, self.simulationNum), self.vRest, dtype = np.float64)
         #loop
         for i in range(self.stepNum):
-            self.votage[i], self.spike[i] = self._update(current[i], tempVotage)
-            tempVotage = self.votage[i]
-        return self.votage, self.spike
+            self.voltage[i], self.spike[i] = self._update(current[i], tempVoltage)
+            tempVoltage = self.voltage[i]
+        return self.voltage, self.spike
 
     def getFiringNum(self):
         return np.sum(self.spike, axis = 0)
@@ -67,12 +67,12 @@ class LIF(object):
 
         time = np.array(range(self.stepNum), dtype = np.float64) * self.dt
         for i in range(self.simulationNum):
-            line, = plt.plot(time, self.votage[:, i], c = color[i])
+            line, = plt.plot(time, self.voltage[:, i], c = color[i])
             point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
             line.set_label('I = ' + str(currentList[i]) + ' mA')
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
-        plt.ylabel('votage (mV)')
+        plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('membrane potential and spiking behavior')
         plt.show()
@@ -87,7 +87,7 @@ class Izhikevich(object):
         #float b: sensitivity of u to v
         #float c: after-spike reset v
         #float d: after-spike reset u
-        #float vThreshold: threshold votage V_t
+        #float vThreshold: threshold voltage V_t
         #float dt: simulation step size, msec
         super(Izhikevich, self).__init__()
         self.a = a
@@ -99,52 +99,52 @@ class Izhikevich(object):
         self.halfDt = self.dt / 2 #used for update v stably
         return
 
-    def _update(self, tempCurrent, tempVotage, tempU):
+    def _update(self, tempCurrent, tempVoltage, tempU):
         #IN
         #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input currents
-        #np.ndarray tempVotage, dtype = np.float64, shape = (1, n): n different membrance potentials
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials
         #np.ndarray tempU, dtype = np.float64, shape = (1, n): n different recovary variables
         #OUT
-        #np.ndarray tempVotage, dtype = np.float64, shpape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shpape = (1, n): updated membrance potential
         #np.ndarray tempU, dtype = np.float64, shape = (1, n): updated recovary variables
         #np.ndarray spike, dtype = np.bool, shpape = (1, n): True: fire; False: not fire
 
         #update V first half
-        dV = (0.04 * np.square(tempVotage) + 5 * tempVotage + 140 - tempU + tempCurrent) * self.halfDt
-        tempVotage = tempVotage + dV
+        dV = (0.04 * np.square(tempVoltage) + 5 * tempVoltage + 140 - tempU + tempCurrent) * self.halfDt
+        tempVoltage = tempVoltage + dV
 
         #update U
-        dU = self.a * (self.b * tempVotage - tempU) * self.dt
+        dU = self.a * (self.b * tempVoltage - tempU) * self.dt
         tempU = tempU + dU
 
         #update V second half
-        dV = (0.04 * np.square(tempVotage) + 5 * tempVotage + 140 - tempU + tempCurrent) * self.halfDt
-        tempVotage = tempVotage + dV
+        dV = (0.04 * np.square(tempVoltage) + 5 * tempVoltage + 140 - tempU + tempCurrent) * self.halfDt
+        tempVoltage = tempVoltage + dV
 
         #get spike and reset
-        spike = tempVotage >= self.vThreshold
-        tempVotage[spike] = self.c
+        spike = tempVoltage >= self.vThreshold
+        tempVoltage[spike] = self.c
         tempU[spike] = tempU[spike] + self.d
-        return tempVotage, tempU, spike
+        return tempVoltage, tempU, spike
 
     def simulate(self, current):
         #IN
         #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents
         #OUT
-        #np.ndarray votage, dtype = np.float64, shape = (k, n): membrance potential
+        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential
         #np.ndarray spike, dtype = np.bool, shape = (k, n): spiking behavior
-        self.votage = np.empty_like(current, dtype = np.float64)
+        self.voltage = np.empty_like(current, dtype = np.float64)
         self.spike = np.empty_like(current, dtype = np.bool)
         self.stepNum, self.simulationNum = current.shape
 
         #init v, u
-        tempVotage = np.full((1, self.simulationNum), self.c, dtype = np.float64)
+        tempVoltage = np.full((1, self.simulationNum), self.c, dtype = np.float64)
         tempU = np.full((1, self.simulationNum), self.b * self.c, dtype = np.float64)
         #loop
         for i in range(self.stepNum):
-            self.votage[i], tempU, self.spike[i] = self._update(current[i], tempVotage, tempU)
-            tempVotage = self.votage[i]
-        return self.votage, self.spike
+            self.voltage[i], tempU, self.spike[i] = self._update(current[i], tempVoltage, tempU)
+            tempVoltage = self.voltage[i]
+        return self.voltage, self.spike
 
     def getFiringNum(self):
         return np.sum(self.spike, axis = 0)
@@ -158,12 +158,12 @@ class Izhikevich(object):
 
         time = np.array(range(self.stepNum), dtype = np.float64) * self.dt
         for i in range(self.simulationNum):
-            line, = plt.plot(time, self.votage[:, i], c = color[i])
+            line, = plt.plot(time, self.voltage[:, i], c = color[i])
             point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
             line.set_label('I = ' + str(currentList[i]) + ' mA')
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
-        plt.ylabel('votage (mV)')
+        plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('membrane potential and spiking behavior')
         plt.show()
@@ -193,7 +193,7 @@ class HodgkinHuxley(object):
         #float dt: simulation step size, msec
         #bool TTX: True: use drug TTX; False: not use
         #bool pronase: True: use drug pronase; False: not use
-        #float VBase: baseline votage
+        #float VBase: baseline voltage
         super(HodgkinHuxley, self).__init__()
         self.capitance = capitance
         self.gK = gK
@@ -237,7 +237,7 @@ class HodgkinHuxley(object):
         self.bNPC = bNParameter[2]
 
         #init cell
-        #float vRest: rest votage V_r
+        #float vRest: rest voltage V_r
         #float mInit: gating variable for Na activation gate
         #float hInit: gating variable for Na inactivation gate
         #float nInit: gating variable for K activation gate
@@ -253,15 +253,15 @@ class HodgkinHuxley(object):
         self.nInit = aN / (aN + bN)
         return
 
-    def _update(self, tempCurrent, tempVotage, tempM, tempH, tempN):
+    def _update(self, tempCurrent, tempVoltage, tempM, tempH, tempN):
         #IN
         #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input currents
-        #np.ndarray tempVotage, dtype = np.float64, shape = (1, n): n different membrance potentials
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials
         #np.ndarray tempM, dtype = np.float64, shape = (1, n): n different m values
         #np.ndarray tempH, dtype = np.float64, shape = (1, n): n different h values
         #np.ndarray tempN, dtype = np.float64, shape = (1, n): n different n values
         #OUT
-        #np.ndarray tempVotage, dtype = np.float64, shpape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shpape = (1, n): updated membrance potential
         #np.ndarray tempM, dtype = np.float64, shape = (1, n): updated m values
         #np.ndarray tempH, dtype = np.float64, shape = (1, n): updated h values
         #np.ndarray tempN, dtype = np.float64, shape = (1, n): updated n values
@@ -269,23 +269,23 @@ class HodgkinHuxley(object):
 
 
         #compute a, b
-        aM = self.aMPA * (self.aMPB - tempVotage) / (np.exp((self.aMPB - tempVotage) / self.aMPC) - self.aMPD)
-        bM = self.bMPA * np.exp((self.bMPB - tempVotage) / self.bMPC)
+        aM = self.aMPA * (self.aMPB - tempVoltage) / (np.exp((self.aMPB - tempVoltage) / self.aMPC) - self.aMPD)
+        bM = self.bMPA * np.exp((self.bMPB - tempVoltage) / self.bMPC)
         if self.pronase:
             tempH = 1
         else:
-            aH = self.aHPA * np.exp((self.aHPB - tempVotage) / self.aHPC)
-            bH = self.bHPA / (np.exp((self.bHPB - tempVotage) / self.bHPC) - self.bHPD)
-        aN = self.aNPA * (self.aNPB - tempVotage) / (np.exp((self.aNPB - tempVotage) / self.aNPC) - self.aNPD)
-        bN = self.bNPA * np.exp((self.bNPB - tempVotage) / self.bNPC)
+            aH = self.aHPA * np.exp((self.aHPB - tempVoltage) / self.aHPC)
+            bH = self.bHPA / (np.exp((self.bHPB - tempVoltage) / self.bHPC) - self.bHPD)
+        aN = self.aNPA * (self.aNPB - tempVoltage) / (np.exp((self.aNPB - tempVoltage) / self.aNPC) - self.aNPD)
+        bN = self.bNPA * np.exp((self.bNPB - tempVoltage) / self.bNPC)
 
         #update V, m, h, n
-        IK = self.gK * np.power(tempN, 4) * (tempVotage - self.VK)
+        IK = self.gK * np.power(tempN, 4) * (tempVoltage - self.VK)
         if self.TTX:
             INa = 0
         else:
-            INa = self.gNa * np.power(tempM, 3) * tempH * (tempVotage - self.VNa)
-        IL = self.gL * (tempVotage - self.VL)
+            INa = self.gNa * np.power(tempM, 3) * tempH * (tempVoltage - self.VNa)
+        IL = self.gL * (tempVoltage - self.VL)
         dV = (tempCurrent - IK - INa - IL) / self.capitance * self.dt
         dM = (aM * (1 - tempM) - bM * tempM) * self.dt
         if self.pronase:
@@ -293,7 +293,7 @@ class HodgkinHuxley(object):
         else:
             dH = (aH * (1 - tempH) - bH * tempH) * self.dt
         dN = (aN * (1 - tempN) - bN * tempN) * self.dt
-        tempVotage = tempVotage + dV
+        tempVoltage = tempVoltage + dV
         tempM = tempM + dM
         if self.pronase:
             tempH = 1
@@ -323,32 +323,32 @@ class HodgkinHuxley(object):
             print('W: overflow for n')
             tempN[mask0] = 0
             tempN[mask1] = 1
-        return tempVotage, tempM, tempH, tempN
+        return tempVoltage, tempM, tempH, tempN
 
     def simulate(self, current):
         #IN
         #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents
         #OUT
-        #np.ndarray votage, dtype = np.float64, shape = (k, n): membrance potential
-        self.votage = np.empty_like(current, dtype = np.float64)
+        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential
+        self.voltage = np.empty_like(current, dtype = np.float64)
         self.parameterM = np.empty_like(current, dtype = np.float64)
         self.parameterH = np.empty_like(current, dtype = np.float64)
         self.parameterN = np.empty_like(current, dtype = np.float64)
         self.stepNum, self.simulationNum = current.shape
 
         #init v, u
-        tempVotage = np.full((1, self.simulationNum), self.vRest, dtype = np.float64)
+        tempVoltage = np.full((1, self.simulationNum), self.vRest, dtype = np.float64)
         tempM = np.full((1, self.simulationNum), self.mInit, dtype = np.float64)
         tempH = np.full((1, self.simulationNum), self.hInit, dtype = np.float64)
         tempN = np.full((1, self.simulationNum), self.nInit, dtype = np.float64)
         #loop
         for i in range(self.stepNum):
-            self.votage[i], self.parameterM[i], self.parameterH[i], self.parameterN[i] = self._update(current[i], tempVotage, tempM, tempH, tempN)
-            tempVotage = self.votage[i]
+            self.voltage[i], self.parameterM[i], self.parameterH[i], self.parameterN[i] = self._update(current[i], tempVoltage, tempM, tempH, tempN)
+            tempVoltage = self.voltage[i]
             tempM = self.parameterM[i]
             tempH = self.parameterH[i]
             tempN = self.parameterN[i]
-        return self.votage
+        return self.voltage
 
     def plot(self, currentList, halfInputFlag = False, plotMHNFlag = False):
         #IN
@@ -362,10 +362,10 @@ class HodgkinHuxley(object):
 
         time = np.array(range(self.stepNum), dtype = np.float64) * self.dt
         for i in range(self.simulationNum):
-            line, = plt.plot(time, self.votage[:, i], c = color[i])
+            line, = plt.plot(time, self.voltage[:, i], c = color[i])
             line.set_label('I = ' + str(currentList[i]) + ' mA')
         plt.xlabel('time (msec)')
-        plt.ylabel('votage (mV)')
+        plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         if halfInputFlag:
             plt.title('membrane potential when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
@@ -378,7 +378,7 @@ class HodgkinHuxley(object):
                 line, = plt.plot(time, self.parameterM[:, i], c = color[i])
                 line.set_label('I = ' + str(currentList[i]) + ' mA')
             plt.xlabel('time (msec)')
-            plt.ylabel('votage (mV)')
+            plt.ylabel('voltage (mV)')
             plt.legend(loc = 5)
             if halfInputFlag:
                 plt.title('parameter m when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
@@ -390,7 +390,7 @@ class HodgkinHuxley(object):
                 line, = plt.plot(time, self.parameterH[:, i], c = color[i])
                 line.set_label('I = ' + str(currentList[i]) + ' mA')
             plt.xlabel('time (msec)')
-            plt.ylabel('votage (mV)')
+            plt.ylabel('voltage (mV)')
             plt.legend(loc = 5)
             if halfInputFlag:
                 plt.title('parameter h when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
@@ -402,7 +402,7 @@ class HodgkinHuxley(object):
                 line, = plt.plot(time, self.parameterN[:, i], c = color[i])
                 line.set_label('I = ' + str(currentList[i]) + ' mA')
             plt.xlabel('time (msec)')
-            plt.ylabel('votage (mV)')
+            plt.ylabel('voltage (mV)')
             plt.legend(loc = 5)
             if halfInputFlag:
                 plt.title('parameter n when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
@@ -418,8 +418,8 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vRest: rest votage V_r
-    #float vThreshold: threshold votage V_t
+    #float vRest: rest voltage V_r
+    #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
 
@@ -448,8 +448,8 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistanc
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vRest: rest votage V_r
-    #float vThreshold: threshold votage V_t
+    #float vRest: rest voltage V_r
+    #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
 
@@ -485,7 +485,7 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 
     #float b: sensitivity of u to v
     #float c: after-spike reset v
     #float d: after-spike reset u
-    #float vThreshold: threshold votage V_t
+    #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
 
     #preprocessing
@@ -519,7 +519,7 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #float dt: simulation step size, msec
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
-    #float VBase: baseline votage
+    #float VBase: baseline voltage
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
 
     #preprocessing
@@ -551,7 +551,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #flaot VNa: equilibrium potential for Na
     #float VL: equilibrium potential for other linear ions
     #float dt: simulation step size, msec
-    #float VBase: baseline votage
+    #float VBase: baseline voltage
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
 
     #preprocessing
@@ -577,7 +577,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     line, = plt.plot(time, v2[:, 0], c = 'r')
     line.set_label('pronase')
     plt.xlabel('time (msec)')
-    plt.ylabel('votage (mV)')
+    plt.ylabel('voltage (mV)')
     plt.legend(loc = 5)
     plt.title('membrane potential when I = ' + str(initCurrent) + ' mA')
     plt.show()
@@ -590,7 +590,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         line, = plt.plot(time, HH2.parameterM[:, 0], c = 'r')
         line.set_label('pronase')
         plt.xlabel('time (msec)')
-        plt.ylabel('votage (mV)')
+        plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('parameter m when I = ' + str(initCurrent) + ' mA')
         plt.show()
@@ -602,7 +602,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         line, = plt.plot(time, HH2.parameterH[:, 0], c = 'r')
         line.set_label('pronase')
         plt.xlabel('time (msec)')
-        plt.ylabel('votage (mV)')
+        plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('parameter h when I = ' + str(initCurrent) + ' mA')
         plt.show()
@@ -614,7 +614,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         line, = plt.plot(time, HH2.parameterN[:, 0], c = 'r')
         line.set_label('pronase')
         plt.xlabel('time (msec)')
-        plt.ylabel('votage (mV)')
+        plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('parameter n when I = ' + str(initCurrent) + ' mA')
         plt.show()
@@ -628,8 +628,8 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vRest: rest votage V_r
-    #float vThreshold: threshold votage V_t
+    #float vRest: rest voltage V_r
+    #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
 
     #preprocessing
@@ -656,7 +656,7 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     line.set_label('IF')
     point.set_label('IF')
     plt.xlabel('time (msec)')
-    plt.ylabel('votage (mV)')
+    plt.ylabel('voltage (mV)')
     plt.title('membrane potential and spiking behavior when I = ' + str(initCurrent) + ' mA')
     plt.legend(loc = 5)
     plt.show()
@@ -671,8 +671,8 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vRest: rest votage V_r
-    #float vThreshold: threshold votage V_t
+    #float vRest: rest voltage V_r
+    #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
 
     #preprocessing
@@ -714,8 +714,8 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     #float timeWindow: simulation time
     #float capitance: C_m
     #float resistance: R_m
-    #float vRest: rest votage V_r
-    #float vThreshold: threshold votage V_t
+    #float vRest: rest voltage V_r
+    #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
 
     #preprocessing
@@ -736,7 +736,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     line, = plt.plot(time, resistance * current, c = 'g')
     line.set_label('R_m * I')
     plt.xlabel('time (msec)')
-    plt.ylabel('votage (mV)')
+    plt.ylabel('voltage (mV)')
     plt.title('terms in LIF model when I = ' + str(initCurrent) + ' mA')
     plt.legend(loc = 5)
     plt.show()
@@ -756,7 +756,7 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
     #float dt: simulation step size, msec
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
-    #float VBase: baseline votage
+    #float VBase: baseline voltage
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
 
     #preprocessing
