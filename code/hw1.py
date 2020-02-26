@@ -778,43 +778,43 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
 
 
 if __name__ == '__main__':
-    # currentList = [0.3, 0.4, 0.5]
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    currentList = [0.3, 0.4, 0.5]
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    # minCurrent = 0.1
-    # maxCurrent = 3
-    # currentStepSize = 0.1
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    minCurrent = 0.1
+    maxCurrent = 3
+    currentStepSize = 0.1
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    # currentList = [4, 5, 6]
-    # timeWindow = 500
-    # a = 0.02
-    # b = 0.2
-    # c = -65
-    # d = 8
-    # vThreshold = 30
-    # Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
+    currentList = [4, 5, 6]
+    timeWindow = 500
+    a = 0.02
+    b = 0.2
+    c = -65
+    d = 8
+    vThreshold = 30
+    Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
 
-    # currentList = [-10, 2, 5, 9]
-    # timeWindow = 50
-    # capitance = 1
-    # gK = 36
-    # gNa = 120
-    # gL = 0.3
-    # VK = -12
-    # VNa = 115
-    # VL = 10.6
-    # Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
+    currentList = [-10, 2, 5, 9]
+    timeWindow = 50
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
 
     current = 5
     timeWindow = 25
@@ -827,39 +827,39 @@ if __name__ == '__main__':
     VL = 10.6
     Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, plotMHNFlag = True)
 
-    # current = 200
-    # timeWindow = 10
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    current = 200
+    timeWindow = 10
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
     
-    # minCurrent = 0.1
-    # maxCurrent = 3
-    # currentStepSize = 0.1
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    minCurrent = 0.1
+    maxCurrent = 3
+    currentStepSize = 0.1
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
     
-    # current = 0.26
-    # timeWindow = 1000
-    # capitance = 1
-    # resistance = 20
-    # vRest = -65
-    # vThreshold = 5
-    # EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    current = 0.26
+    timeWindow = 1000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
 
-    # currentList = [-9, 5, 9]
-    # timeWindow = 50
-    # capitance = 1
-    # gK = 36
-    # gNa = 120
-    # gL = 0.3
-    # VK = -12
-    # VNa = 115
-    # VL = 10.6
-    # EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True)
+    currentList = [-9, 5, 9]
+    timeWindow = 50
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True)
