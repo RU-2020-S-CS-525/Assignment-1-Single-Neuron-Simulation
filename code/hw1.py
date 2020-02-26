@@ -207,13 +207,7 @@ class HodgkinHuxley(object):
         self.pronase = pronase
         self.VBase = VBase
 
-        #init cell
-        #float vRest: rest votage V_r
-        #float mInit: gating variable for Na activation gate
-        #float hInit: gating variable for Na inactivation gate
-        #float nInit: gating variable for K activation gate
-
-
+        #define channel parameters
         aMParameter = (0.1, 25, 10, 1)
         bMParameter = (4, 0, 18)
         aHParameter = (0.07, 0, 20)
@@ -242,7 +236,11 @@ class HodgkinHuxley(object):
         self.bNPB = bNParameter[1] + self.VBase
         self.bNPC = bNParameter[2]
 
-
+        #init cell
+        #float vRest: rest votage V_r
+        #float mInit: gating variable for Na activation gate
+        #float hInit: gating variable for Na inactivation gate
+        #float nInit: gating variable for K activation gate
         self.vRest = 0 + VBase
         aM = self.aMPA * (self.aMPB - self.vRest) / (np.exp((self.aMPB - self.vRest) / self.aMPC) - self.aMPD)
         bM = self.bMPA * np.exp((self.bMPB - self.vRest) / self.bMPC)
@@ -250,10 +248,9 @@ class HodgkinHuxley(object):
         bH = self.bHPA / (np.exp((self.bHPB - self.vRest) / self.bHPC) - self.bHPD)
         aN = self.aNPA * (self.aNPB - self.vRest) / (np.exp((self.aNPB - self.vRest) / self.aNPC) - self.aNPD)
         bN = self.bNPA * np.exp((self.bNPB - self.vRest) / self.bNPC)
-        self.mInit = aM/(aM+bM)
-        self.hInit = aH/(aH+bH)
-        self.nInit = aN/(aN+bN)
-        print(self.mInit, self.hInit, self.nInit)
+        self.mInit = aM / (aM + bM)
+        self.hInit = aH / (aH + bH)
+        self.nInit = aN / (aN + bN)
         return
 
     def _update(self, tempCurrent, tempVotage, tempM, tempH, tempN):
@@ -334,6 +331,9 @@ class HodgkinHuxley(object):
         #OUT
         #np.ndarray votage, dtype = np.float64, shape = (k, n): membrance potential
         self.votage = np.empty_like(current, dtype = np.float64)
+        self.parameterM = np.empty_like(current, dtype = np.float64)
+        self.parameterH = np.empty_like(current, dtype = np.float64)
+        self.parameterN = np.empty_like(current, dtype = np.float64)
         self.stepNum, self.simulationNum = current.shape
 
         #init v, u
@@ -343,14 +343,18 @@ class HodgkinHuxley(object):
         tempN = np.full((1, self.simulationNum), self.nInit, dtype = np.float64)
         #loop
         for i in range(self.stepNum):
-            self.votage[i], tempM, tempH, tempN = self._update(current[i], tempVotage, tempM, tempH, tempN)
+            self.votage[i], self.parameterM[i], self.parameterH[i], self.parameterN[i] = self._update(current[i], tempVotage, tempM, tempH, tempN)
             tempVotage = self.votage[i]
+            tempM = self.parameterM[i]
+            tempH = self.parameterH[i]
+            tempN = self.parameterN[i]
         return self.votage
 
-    def plot(self, currentList, halfInputFlag = False):
+    def plot(self, currentList, halfInputFlag = False, plotMHNFlag = False):
         #IN
         #list currentList: [float current]
         #bool halfInputFlag: change the title; True: plot for EX4, False: general plot
+        #bool plotMHNFlag: True: plot parameter m h n; False: not plot
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
             print('E: too many currents')
@@ -368,6 +372,43 @@ class HodgkinHuxley(object):
         else:
             plt.title('membrane potential')
         plt.show()
+
+        if plotMHNFlag:
+            for i in range(self.simulationNum):
+                line, = plt.plot(time, self.parameterM[:, i], c = color[i])
+                line.set_label('I = ' + str(currentList[i]) + ' mA')
+            plt.xlabel('time (msec)')
+            plt.ylabel('votage (mV)')
+            plt.legend(loc = 5)
+            if halfInputFlag:
+                plt.title('parameter m when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
+            else:
+                plt.title('parameter m')
+            plt.show()
+
+            for i in range(self.simulationNum):
+                line, = plt.plot(time, self.parameterH[:, i], c = color[i])
+                line.set_label('I = ' + str(currentList[i]) + ' mA')
+            plt.xlabel('time (msec)')
+            plt.ylabel('votage (mV)')
+            plt.legend(loc = 5)
+            if halfInputFlag:
+                plt.title('parameter h when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
+            else:
+                plt.title('parameter h')
+            plt.show()
+
+            for i in range(self.simulationNum):
+                line, = plt.plot(time, self.parameterN[:, i], c = color[i])
+                line.set_label('I = ' + str(currentList[i]) + ' mA')
+            plt.xlabel('time (msec)')
+            plt.ylabel('votage (mV)')
+            plt.legend(loc = 5)
+            if halfInputFlag:
+                plt.title('parameter n when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
+            else:
+                plt.title('parameter n')
+            plt.show()
         return    
 
 
@@ -464,7 +505,7 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 
     izhikevich.plot(currentList)
     return
 
-def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65):
+def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65, plotMHNFlag = False):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -479,6 +520,7 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
     #float VBase: baseline votage
+    #bool plotMHNFlag: True: plot parameter m h n; False: not plot
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -494,10 +536,10 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
 
     #simulate and plot
     HH.simulate(current)
-    HH.plot(currentList)
+    HH.plot(currentList, plotMHNFlag)
     return
 
-def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, VBase = -65):
+def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, VBase = -65, plotMHNFlag = False):
     #IN
     #float initCurrent: input current
     #float timeWindow: simulation time, msec
@@ -510,6 +552,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #float VL: equilibrium potential for other linear ions
     #float dt: simulation step size, msec
     #float VBase: baseline votage
+    #bool plotMHNFlag: True: plot parameter m h n; False: not plot
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -538,6 +581,43 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     plt.legend(loc = 5)
     plt.title('membrane potential when I = ' + str(initCurrent) + ' mA')
     plt.show()
+
+    if plotMHNFlag:
+        line, = plt.plot(time, HH0.parameterM[:, 0], c = 'b')
+        line.set_label('no drug')
+        line, = plt.plot(time, HH1.parameterM[:, 0], c = 'g')
+        line.set_label('TTX')
+        line, = plt.plot(time, HH2.parameterM[:, 0], c = 'r')
+        line.set_label('pronase')
+        plt.xlabel('time (msec)')
+        plt.ylabel('votage (mV)')
+        plt.legend(loc = 5)
+        plt.title('parameter m when I = ' + str(initCurrent) + ' mA')
+        plt.show()
+
+        line, = plt.plot(time, HH0.parameterH[:, 0], c = 'b')
+        line.set_label('no drug')
+        line, = plt.plot(time, HH1.parameterH[:, 0], c = 'g')
+        line.set_label('TTX')
+        line, = plt.plot(time, HH2.parameterH[:, 0], c = 'r')
+        line.set_label('pronase')
+        plt.xlabel('time (msec)')
+        plt.ylabel('votage (mV)')
+        plt.legend(loc = 5)
+        plt.title('parameter h when I = ' + str(initCurrent) + ' mA')
+        plt.show()
+
+        line, = plt.plot(time, HH0.parameterN[:, 0], c = 'b')
+        line.set_label('no drug')
+        line, = plt.plot(time, HH1.parameterN[:, 0], c = 'g')
+        line.set_label('TTX')
+        line, = plt.plot(time, HH2.parameterN[:, 0], c = 'r')
+        line.set_label('pronase')
+        plt.xlabel('time (msec)')
+        plt.ylabel('votage (mV)')
+        plt.legend(loc = 5)
+        plt.title('parameter n when I = ' + str(initCurrent) + ' mA')
+        plt.show()
     return
 
 
@@ -662,7 +742,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.show()
     return
 
-def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65):
+def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65, plotMHNFlag = False):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -677,6 +757,7 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
     #float VBase: baseline votage
+    #bool plotMHNFlag: True: plot parameter m h n; False: not plot
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -692,7 +773,7 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
 
     #simulate and plot
     HH.simulate(current)
-    HH.plot(currentList, halfInputFlag = True)
+    HH.plot(currentList, halfInputFlag = True, plotMHNFlag = plotMHNFlag)
     return
 
 
@@ -703,8 +784,8 @@ if __name__ == '__main__':
     # resistance = 20
     # vRest = -65
     # vThreshold = 5
-    # Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.1, leaky = True)
-    #
+    # Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+
     # minCurrent = 0.1
     # maxCurrent = 3
     # currentStepSize = 0.1
@@ -714,7 +795,7 @@ if __name__ == '__main__':
     # vRest = -65
     # vThreshold = 5
     # Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
-    # #
+
     # currentList = [4, 5, 6]
     # timeWindow = 500
     # a = 0.02
@@ -735,16 +816,16 @@ if __name__ == '__main__':
     # VL = 10.6
     # Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
 
-    # current = 5
-    # timeWindow = 25
-    # capitance = 1
-    # gK = 36
-    # gNa = 120
-    # gL = 0.3
-    # VK = -12
-    # VNa = 115
-    # VL = 10.6
-    # Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01)
+    current = 5
+    timeWindow = 25
+    capitance = 1
+    gK = 36
+    gNa = 120
+    gL = 0.3
+    VK = -12
+    VNa = 115
+    VL = 10.6
+    Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, plotMHNFlag = True)
 
     # current = 200
     # timeWindow = 10
@@ -753,7 +834,7 @@ if __name__ == '__main__':
     # vRest = -65
     # vThreshold = 5
     # EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
-    #
+    
     # minCurrent = 0.1
     # maxCurrent = 3
     # currentStepSize = 0.1
@@ -763,7 +844,7 @@ if __name__ == '__main__':
     # vRest = -65
     # vThreshold = 5
     # EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
-    #
+    
     # current = 0.26
     # timeWindow = 1000
     # capitance = 1
@@ -772,13 +853,13 @@ if __name__ == '__main__':
     # vThreshold = 5
     # EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
 
-    currentList = [-9, 5, 9]
-    timeWindow = 50
-    capitance = 1
-    gK = 36
-    gNa = 120
-    gL = 0.3
-    VK = -12
-    VNa = 115
-    VL = 10.6
-    EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
+    # currentList = [-9, 5, 9]
+    # timeWindow = 50
+    # capitance = 1
+    # gK = 36
+    # gNa = 120
+    # gL = 0.3
+    # VK = -12
+    # VNa = 115
+    # VL = 10.6
+    # EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True)
