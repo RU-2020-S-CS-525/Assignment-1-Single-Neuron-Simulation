@@ -26,7 +26,7 @@
 		
 		IF: See Figure \ref{fig:Fig1.sub.L}. Because the neuron continually integrates input, its membrane potential $V_m$ will constantly grow up. Finally, $V_m$ will reach the threshold $V_{threshold}$. Then, the neuron will fire and reset $V_m$.
 		
-		LIF: See Figure\ref{fig:Fig1.sub.L}. At the beginning, because the input current $I$ is far smaller than $-V_m/R_m$, voltage is dominated by ``leak'' and will increase steeply from $V_{rest}$. Then, as voltage $V_m$ increasing, $-V_m/R_m$ will decrease and be close or equal to the input current $I$. So, $dV/dt$ will be close to 0. Because the input can not exceed the threshold $V_m/R_m$, it will be leaked out. Therefore, finally the voltage will converge to $R_mI$, where $dV/dt = 0$. Also, because $I < V_{threshold}/R_m$, this neuron will never fire.
+		LIF: See Figure\ref{fig:Fig1.sub.L}. At the beginning, because the input current $I$ is far smaller than $-V_m/R_m$, voltage is dominated by ``leak'' and will increase steeply from $V_{rest}$. Then, as voltage $V_m$ increasing, $-V_m/R_m$ will decrease and be close or equal to the input current $I$. Finally, $dV/dt$ will converge to 0, and $V_m$ will converge to $R_mI$. Because the input current $I$ is smaller than the threshold $V_{threshold}/R_m$, the voltage $V_m$ can not exceed the threshold $V_m/R_m$. Therefore, this neuron will never fire.
 		
 		\item what do you expect to happen if an IF neuron is constantly fed a large input current? An LIF neuron?
 			
