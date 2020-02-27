@@ -58,7 +58,7 @@ class LIF(object):
     def getFiringNum(self):
         return np.sum(self.spike, axis = 0)
 
-    def plot(self, currentList):
+    def plot(self, currentList, fn_save=None):
         #list currentList: [float current]
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
@@ -75,6 +75,8 @@ class LIF(object):
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('membrane potential and spiking behavior')
+        if fn_save is not None:
+            plt.savefig('../docs/plots/' + fn_save)
         plt.show()
         return
 
@@ -437,10 +439,11 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
 
     #simulate and plot
     lif.simulate(current)
-    lif.plot(currentList)
+    lif.plot(currentList, 'plot_programming_1.png')
     return
 
-def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True):
+def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
+       resistance, vRest, vThreshold, dt = 0.01, leaky = True, fn_save = None):
     #IN
     #float minCurrent: minimum input current
     #float maxCurrent: maximum input current
@@ -467,13 +470,15 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistanc
     lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky)
     #simulate
     lif.simulate(current)
-    rate = lif.getFiringNum() / timeWindow * 1000
+    rate = lif.getFiringNum() * 1000.0 / timeWindow
 
     #plot
     plt.plot(currentList, rate)
     plt.xlabel('current (mA)')
     plt.ylabel('firing rate (Hz)')
     plt.title('firing rate vs. input current')
+    if fn_save is not None:
+        plt.savefig('../docs/plots/' + fn_save)
     plt.show()
     return
 
@@ -779,22 +784,24 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
 
 if __name__ == '__main__':
     currentList = [0.3, 0.4, 0.5]
-    timeWindow = 1000
+    timeWindow = 250
     capitance = 1
     resistance = 20
     vRest = -65
     vThreshold = 5
     Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
 
-    minCurrent = 0.1
+    minCurrent = 0.01
     maxCurrent = 3
-    currentStepSize = 0.1
+    currentStepSize = 0.01
     timeWindow = 1000
     capitance = 1
     resistance = 20
     vRest = -65
     vThreshold = 5
-    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
+       resistance, vRest, vThreshold, dt = 0.01, leaky = True,
+       fn_save='plot_programming_2.png')
 
     currentList = [4, 5, 6]
     timeWindow = 500

@@ -5,9 +5,19 @@
 \usepackage{algorithmicx}
 \usepackage{graphicx}
 \usepackage{subfigure}
+\usepackage{natbib}
+\usepackage[colorlinks]{hyperref}
 
 \graphicspath{{plots/}}
 
+\hypersetup{
+     colorlinks = true,
+     linkcolor = blue,
+     anchorcolor = blue,
+     citecolor = blue,
+     filecolor = blue,
+     urlcolor = blue
+}
 
 \textwidth 6.5in \textheight 9.05in \oddsidemargin 0.0in
 \evensidemargin 0.0in \topmargin -0.55in
@@ -58,7 +68,8 @@
 	\begin{enumerate}
 		\item Simulate an LIF neuron with different input currents and plot the membrane potential, showing (a) potential decay over time and (b) spiking behavior.
 
-		See Figure \ref{fig:Fig2.sub.voltage}. The typical value we use is $V_{rest} = -65$, $V_{threshold} = 5$, $C_m = 1$, and $R_m = 20$. 
+        \cite{Ermentrout_2010}
+		See Figure \ref{fig:Fig2.sub.voltage}. The typical value we use is $V_{rest} = -65 mV$, $V_{threshold} = 5$, $C_m = 1$, and $R_m = 20$. 
 		
 		\item Plot the firing rate as a function of the input current.
 		
@@ -68,10 +79,10 @@
 			\centering
 			\subfigure[Potential]{
 			\label{fig:Fig2.sub.voltage}
-			\includegraphics[scale=0.3]{plot_programming_1.png}}
+			\includegraphics[width=0.48\textwidth]{plot_programming_1.png}}
 			\subfigure[Firing rate]{
 			\label{fig:Fig2.sub.fire_rate}
-			\includegraphics[scale=0.3]{plot_programming_2.png}}
+			\includegraphics[width=0.48\textwidth]{plot_programming_2.png}}
 			\caption{LIF and IF}
 		\end{figure}
 		
@@ -125,4 +136,7 @@
 			\label{fig:fig5}
 		\end{figure}
 	\end{enumerate}
+	
+	\bibliography{ref}
+    \bibliographystyle{acl_natbib}
 \end{document}
