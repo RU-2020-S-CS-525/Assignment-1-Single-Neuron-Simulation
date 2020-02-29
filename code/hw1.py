@@ -88,7 +88,10 @@ class LIF(object):
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
-        plt.title('membrane potential and spiking behavior')
+        if self.tRef > 0:
+            plt.title('membrane potential and spiking behavior with refractory time = ' + str(self.tRef) + ' msec')
+        else:
+            plt.title('membrane potential and spiking behavior')
         if fn_save is not None:
             plt.savefig('../docs/plots/' + fn_save)
         plt.show()
@@ -121,9 +124,9 @@ class Izhikevich(object):
         #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials
         #np.ndarray tempU, dtype = np.float64, shape = (1, n): n different recovary variables
         #OUT
-        #np.ndarray tempVoltage, dtype = np.float64, shpape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential
         #np.ndarray tempU, dtype = np.float64, shape = (1, n): updated recovary variables
-        #np.ndarray spike, dtype = np.bool, shpape = (1, n): True: fire; False: not fire
+        #np.ndarray spike, dtype = np.bool, shape = (1, n): True: fire; False: not fire
 
         #update V first half
         dV = (0.04 * np.square(tempVoltage) + 5 * tempVoltage + 140 - tempU + tempCurrent) * self.halfDt
@@ -159,7 +162,7 @@ class Izhikevich(object):
         #loop
         for i in range(self.stepNum):
             self.voltage[i], tempU, self.spike[i] = self._update(current[i], tempVoltage, tempU)
-            tempVoltage = self.voltage[i]
+            tempVoltage = self.voltage[i].reshape((1, self.simulationNum))
         return self.voltage, self.spike
 
     def getFiringNum(self):
@@ -283,11 +286,11 @@ class HodgkinHuxley(object):
         #np.ndarray tempH, dtype = np.float64, shape = (1, n): n different h values
         #np.ndarray tempN, dtype = np.float64, shape = (1, n): n different n values
         #OUT
-        #np.ndarray tempVoltage, dtype = np.float64, shpape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential
         #np.ndarray tempM, dtype = np.float64, shape = (1, n): updated m values
         #np.ndarray tempH, dtype = np.float64, shape = (1, n): updated h values
         #np.ndarray tempN, dtype = np.float64, shape = (1, n): updated n values
-        #np.ndarray spike, dtype = np.bool, shpape = (1, n): True: fire; False: not fire
+        #np.ndarray spike, dtype = np.bool, shape = (1, n): True: fire; False: not fire
 
 
         #compute a, b
@@ -366,10 +369,10 @@ class HodgkinHuxley(object):
         #loop
         for i in range(self.stepNum):
             self.voltage[i], self.parameterM[i], self.parameterH[i], self.parameterN[i] = self._update(current[i], tempVoltage, tempM, tempH, tempN)
-            tempVoltage = self.voltage[i]
-            tempM = self.parameterM[i]
-            tempH = self.parameterH[i]
-            tempN = self.parameterN[i]
+            tempVoltage = self.voltage[i].reshape((1, self.simulationNum))
+            tempM = self.parameterM[i].reshape((1, self.simulationNum))
+            tempH = self.parameterH[i].reshape((1, self.simulationNum))
+            tempN = self.parameterN[i].reshape((1, self.simulationNum))
         return self.voltage
 
     def plot(self, currentList, halfInputFlag = False, plotMHNFlag = False, fn_save = None):
