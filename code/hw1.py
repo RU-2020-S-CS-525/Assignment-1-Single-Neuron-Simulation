@@ -6,11 +6,11 @@ class LIF(object):
     #C_m \frac{dV}{dt} = I(t) - frac{V_m (t)}{R_m}
     def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold = 5, 
                  dt = 0.01, leaky = True, tRef = 0):
-        #float capitance: C_m
-        #float resistance: R_m
-        #float vRest: rest voltage V_r
-        #float vThreshold: threshold voltage V_t
-        #float dt: simulation step size, msec
+        #float capitance: C_m in μF
+        #float resistance: R_m in kΩ
+        #float vRest: rest voltage V_r in mV
+        #float vThreshold: threshold voltage V_t in mV
+        #float dt: simulation step size in msec
         #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
         #float tRef: refractory time
         super(LIF, self).__init__()
@@ -26,11 +26,11 @@ class LIF(object):
 
     def _update(self, tempCurrent, tempVoltage, ref_mask):
         #IN
-        #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input current
-        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potential
+        #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input current in μA
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potential in mV
         #np.ndarray ref_mask, dtype = np.float64, shape = (1, n): n different indicator; True: not in refractory time; False: in refractory time
         #OUT
-        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential in mV
         #np.ndarray spike, dtype = np.bool, shape = (1, n): True: fire; False: not fire
 
         #dV = (I(t) - frac{v_m (t)}{R_m}) * dt / C_m
@@ -44,7 +44,7 @@ class LIF(object):
 
     def simulate(self, current):
         #IN
-        #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents
+        #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents in μA
         #OUT
         #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential
         #np.ndarray spike, dtype = np.bool, shape = (k, n): spiking behavior
@@ -72,7 +72,7 @@ class LIF(object):
 
     def plot(self, currentList, fn_save = None):
         #IN
-        #list currentList: [float current]
+        #list currentList: [float current] in μA
         #str fn_save: file name; None: not save
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
@@ -83,7 +83,7 @@ class LIF(object):
         for i in range(self.simulationNum):
             line, = plt.plot(time, self.voltage[:, i], c = color[i])
             point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
-            line.set_label('I = ' + str(currentList[i]) + ' mA')
+            line.set_label('I = ' + str(currentList[i]) + ' μA')
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
@@ -106,8 +106,8 @@ class Izhikevich(object):
         #float b: sensitivity of u to v
         #float c: after-spike reset v
         #float d: after-spike reset u
-        #float vThreshold: threshold voltage V_t
-        #float dt: simulation step size, msec
+        #float vThreshold: threshold voltage V_t in mV
+        #float dt: simulation step size in msec
         super(Izhikevich, self).__init__()
         self.a = a
         self.b = b
@@ -120,11 +120,11 @@ class Izhikevich(object):
 
     def _update(self, tempCurrent, tempVoltage, tempU):
         #IN
-        #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input currents
-        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials
+        #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input currents in μA
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials in mV
         #np.ndarray tempU, dtype = np.float64, shape = (1, n): n different recovary variables
         #OUT
-        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential in mV
         #np.ndarray tempU, dtype = np.float64, shape = (1, n): updated recovary variables
         #np.ndarray spike, dtype = np.bool, shape = (1, n): True: fire; False: not fire
 
@@ -148,9 +148,9 @@ class Izhikevich(object):
 
     def simulate(self, current):
         #IN
-        #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents
+        #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents in μA
         #OUT
-        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential
+        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential in mV
         #np.ndarray spike, dtype = np.bool, shape = (k, n): spiking behavior
         self.voltage = np.empty_like(current, dtype = np.float64)
         self.spike = np.empty_like(current, dtype = np.bool)
@@ -172,7 +172,7 @@ class Izhikevich(object):
 
     def plot(self, currentList, fn_save = None):
         #IN
-        #list currentList: [float current]
+        #list currentList: [float current] in μA
         #str fn_save: file name; None: not save
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
@@ -183,7 +183,7 @@ class Izhikevich(object):
         for i in range(self.simulationNum):
             line, = plt.plot(time, self.voltage[:, i], c = color[i])
             point = plt.scatter(time[self.spike[:, i]], np.full(np.sum(self.spike[:, i]), self.vThreshold, dtype = np.float64), c = color[i], marker = 'o')
-            line.set_label('I = ' + str(currentList[i]) + ' mA')
+            line.set_label('I = ' + str(currentList[i]) + ' μA')
             point.set_label('spiking indicator')
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
@@ -208,17 +208,17 @@ class HodgkinHuxley(object):
     #a_n(V) = \frac{0.01 (10 - V)}{\exp(10 - V) - 1}
     #b_n(V) = 0.125 \exp(\frac{-V}{80})
     def __init__(self, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65):
-        #float capitance: C_m
-        #float gK: maximum conductance for K
-        #float gNa: maximum conductance for Na
-        #float gL: maximum conductance for other linear ions
-        #float VK: equilibrium potential for K
-        #flaot VNa: equilibrium potential for Na
-        #float VL: equilibrium potential for other linear ions
-        #float dt: simulation step size, msec
+        #float capitance: C_m in μF
+        #float gK: maximum conductance for K in mS
+        #float gNa: maximum conductance for Na in mS
+        #float gL: maximum conductance for other linear ions in mS
+        #float VK: equilibrium potential for K in mV
+        #flaot VNa: equilibrium potential for Na in mV
+        #float VL: equilibrium potential for other linear ions in mV
+        #float dt: simulation step size in msec
         #bool TTX: True: use drug TTX; False: not use
         #bool pronase: True: use drug pronase; False: not use
-        #float VBase: baseline voltage
+        #float VBase: baseline voltage in mV
         super(HodgkinHuxley, self).__init__()
         self.capitance = capitance
         self.gK = gK
@@ -262,7 +262,7 @@ class HodgkinHuxley(object):
         self.bNPC = bNParameter[2]
 
         #init cell
-        #float vRest: rest voltage V_r
+        #float vRest: rest voltage V_r in mV
         #float mInit: gating variable for Na activation gate
         #float hInit: gating variable for Na inactivation gate
         #float nInit: gating variable for K activation gate
@@ -280,13 +280,13 @@ class HodgkinHuxley(object):
 
     def _update(self, tempCurrent, tempVoltage, tempM, tempH, tempN):
         #IN
-        #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input currents
-        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials
+        #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input currents in μA
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potentials in mV
         #np.ndarray tempM, dtype = np.float64, shape = (1, n): n different m values
         #np.ndarray tempH, dtype = np.float64, shape = (1, n): n different h values
         #np.ndarray tempN, dtype = np.float64, shape = (1, n): n different n values
         #OUT
-        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential in mV
         #np.ndarray tempM, dtype = np.float64, shape = (1, n): updated m values
         #np.ndarray tempH, dtype = np.float64, shape = (1, n): updated h values
         #np.ndarray tempN, dtype = np.float64, shape = (1, n): updated n values
@@ -352,9 +352,9 @@ class HodgkinHuxley(object):
 
     def simulate(self, current):
         #IN
-        #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents
+        #np.ndarray current, dtype = np.float64, shape = (k, n): input current, |t| = k * dt, n different currents in μA
         #OUT
-        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential
+        #np.ndarray voltage, dtype = np.float64, shape = (k, n): membrance potential in mV
         self.voltage = np.empty_like(current, dtype = np.float64)
         self.parameterM = np.empty_like(current, dtype = np.float64)
         self.parameterH = np.empty_like(current, dtype = np.float64)
@@ -377,7 +377,7 @@ class HodgkinHuxley(object):
 
     def plot(self, currentList, halfInputFlag = False, plotMHNFlag = False, fn_save = None):
         #IN
-        #list currentList: [float current]
+        #list currentList: [float current] in μA
         #bool halfInputFlag: change the title; True: plot for EX4, False: general plot
         #bool plotMHNFlag: True: plot parameter m h n; False: not plot
         #str fn_save: file name; None: not save
@@ -389,7 +389,7 @@ class HodgkinHuxley(object):
         time = np.array(range(self.stepNum), dtype = np.float64) * self.dt
         for i in range(self.simulationNum):
             line, = plt.plot(time, self.voltage[:, i], c = color[i])
-            line.set_label('I = ' + str(currentList[i]) + ' mA')
+            line.set_label('I = ' + str(currentList[i]) + ' μA')
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
@@ -404,7 +404,7 @@ class HodgkinHuxley(object):
         if plotMHNFlag:
             for i in range(self.simulationNum):
                 line, = plt.plot(time, self.parameterM[:, i], c = color[i])
-                line.set_label('I = ' + str(currentList[i]) + ' mA')
+                line.set_label('I = ' + str(currentList[i]) + ' μA')
             plt.xlabel('time (msec)')
             plt.ylabel('voltage (mV)')
             plt.legend(loc = 5)
@@ -416,7 +416,7 @@ class HodgkinHuxley(object):
 
             for i in range(self.simulationNum):
                 line, = plt.plot(time, self.parameterH[:, i], c = color[i])
-                line.set_label('I = ' + str(currentList[i]) + ' mA')
+                line.set_label('I = ' + str(currentList[i]) + ' μA')
             plt.xlabel('time (msec)')
             plt.ylabel('voltage (mV)')
             plt.legend(loc = 5)
@@ -428,7 +428,7 @@ class HodgkinHuxley(object):
 
             for i in range(self.simulationNum):
                 line, = plt.plot(time, self.parameterN[:, i], c = color[i])
-                line.set_label('I = ' + str(currentList[i]) + ' mA')
+                line.set_label('I = ' + str(currentList[i]) + ' μA')
             plt.xlabel('time (msec)')
             plt.ylabel('voltage (mV)')
             plt.legend(loc = 5)
@@ -442,15 +442,15 @@ class HodgkinHuxley(object):
 
 def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True, tRef = 0, fn_save = None):
     #IN
-    #list currentList: [float current]
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float resistance: R_m
-    #float vRest: rest voltage V_r
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
+    #list currentList: [float current] in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float resistance: R_m in kΩ
+    #float vRest: rest voltage V_r in mV
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
-    #float tRef: refractory time
+    #float tRef: refractory time in msec
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -473,17 +473,17 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
 def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
        resistance, vRest, vThreshold, dt = 0.01, leaky = True, tRef = 0, fn_save = None):
     #IN
-    #float minCurrent: minimum input current
-    #float maxCurrent: maximum input current
-    #float currentStepSize: increasing step for input current
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float resistance: R_m
-    #float vRest: rest voltage V_r
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
+    #float minCurrent: minimum input current in μA
+    #float maxCurrent: maximum input current in μA
+    #float currentStepSize: increasing step for input current in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float resistance: R_m in kΩ
+    #float vRest: rest voltage V_r in mV
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
-    #float tRef: refractory time
+    #float tRef: refractory time in msec
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -504,7 +504,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
 
     #plot
     plt.plot(currentList, rate)
-    plt.xlabel('current (mA)')
+    plt.xlabel('current (μA)')
     plt.ylabel('firing rate (Hz)')
     plt.title('firing rate vs. input current')
     if fn_save is not None:
@@ -514,14 +514,14 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
 
 def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 30, dt = 0.01, fn_save = None):
     #IN
-    #list currentList: [float current]
-    #float timeWindow: simulation time
+    #list currentList: [float current] in μA
+    #float timeWindow: simulation time in msec
     #float a: time scale of u
     #float b: sensitivity of u to v
     #float c: after-spike reset v
     #float d: after-spike reset u
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -544,19 +544,19 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 
 def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, 
        dt = 0.01, TTX = False, pronase = False, VBase = -65, plotMHNFlag = False, fn_save = None):
     #IN
-    #list currentList: [float current]
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float gK: maximum conductance for K
-    #float gNa: maximum conductance for Na
-    #float gL: maximum conductance for other linear ions
-    #float VK: equilibrium potential for K
-    #flaot VNa: equilibrium potential for Na
-    #float VL: equilibrium potential for other linear ions
-    #float dt: simulation step size, msec
+    #list currentList: [float current] in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float gK: maximum conductance for K in mS
+    #float gNa: maximum conductance for Na in mS
+    #float gL: maximum conductance for other linear ions in mS
+    #float VK: equilibrium potential for K in mV
+    #flaot VNa: equilibrium potential for Na in mV
+    #float VL: equilibrium potential for other linear ions in mV
+    #float dt: simulation step size in msec
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
-    #float VBase: baseline voltage
+    #float VBase: baseline voltage in mV
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
     #str fn_save: file name; None: not save
 
@@ -579,17 +579,17 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
 
 def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, VBase = -65, plotMHNFlag = False, fn_save = None):
     #IN
-    #float initCurrent: input current
-    #float timeWindow: simulation time, msec
-    #float capitance: C_m
-    #float gK: maximum conductance for K
-    #float gNa: maximum conductance for Na
-    #float gL: maximum conductance for other linear ions
-    #float VK: equilibrium potential for K
-    #flaot VNa: equilibrium potential for Na
-    #float VL: equilibrium potential for other linear ions
-    #float dt: simulation step size, msec
-    #float VBase: baseline voltage
+    #float initCurrent: input current in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float gK: maximum conductance for K in mS
+    #float gNa: maximum conductance for Na in mS
+    #float gL: maximum conductance for other linear ions in mS
+    #float VK: equilibrium potential for K in mV
+    #flaot VNa: equilibrium potential for Na in mV
+    #float VL: equilibrium potential for other linear ions in mV
+    #float dt: simulation step size in msec
+    #float VBase: baseline voltage in mV
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
     #str fn_save: file name; None: not save
 
@@ -618,7 +618,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     plt.xlabel('time (msec)')
     plt.ylabel('voltage (mV)')
     plt.legend(loc = 5)
-    plt.title('membrane potential when I = ' + str(initCurrent) + ' mA')
+    plt.title('membrane potential when I = ' + str(initCurrent) + ' μA')
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
     plt.show()
@@ -633,7 +633,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
-        plt.title('parameter m when I = ' + str(initCurrent) + ' mA')
+        plt.title('parameter m when I = ' + str(initCurrent) + ' μA')
         plt.show()
 
         line, = plt.plot(time, HH0.parameterH[:, 0], c = 'b')
@@ -645,7 +645,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
-        plt.title('parameter h when I = ' + str(initCurrent) + ' mA')
+        plt.title('parameter h when I = ' + str(initCurrent) + ' μA')
         plt.show()
 
         line, = plt.plot(time, HH0.parameterN[:, 0], c = 'b')
@@ -657,7 +657,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         plt.xlabel('time (msec)')
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
-        plt.title('parameter n when I = ' + str(initCurrent) + ' mA')
+        plt.title('parameter n when I = ' + str(initCurrent) + ' μA')
         plt.show()
     return
 
@@ -665,14 +665,14 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
 def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for comparing membrane potential of IF and LIF
     #IN
-    #float initCurrent: input current
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float resistance: R_m
-    #float vRest: rest voltage V_r
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
-    #float tRef: refractory time
+    #float initCurrent: input current in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float resistance: R_m in kΩ
+    #float vRest: rest voltage V_r in mV
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
+    #float tRef: refractory time in msec
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -700,7 +700,7 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     point.set_label('IF')
     plt.xlabel('time (msec)')
     plt.ylabel('voltage (mV)')
-    plt.title('membrane potential and spiking behavior when I = ' + str(initCurrent) + ' mA')
+    plt.title('membrane potential and spiking behavior when I = ' + str(initCurrent) + ' μA')
     plt.legend(loc = 5)
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
@@ -710,16 +710,16 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
 def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for comparing firing rate of IF and LIF
     #IN
-    #float minCurrent: minimum input current
-    #float maxCurrent: maximum input current
-    #float currentStepSize: increasing step for input current
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float resistance: R_m
-    #float vRest: rest voltage V_r
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
-    #float tRef: refractory time
+    #float minCurrent: minimum input current in μA
+    #float maxCurrent: maximum input current in μA
+    #float currentStepSize: increasing step for input current in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float resistance: R_m in kΩ
+    #float vRest: rest voltage V_r in mV
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
+    #float tRef: refractory time in msec
     #str fn_save: file name; None: not save
 
 
@@ -748,7 +748,7 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     line.set_label('LIF')
     line, = plt.plot(currentList, rate2)
     line.set_label('IF')
-    plt.xlabel('current (mA)')
+    plt.xlabel('current (μA)')
     plt.ylabel('firing rate (Hz)')
     plt.legend(loc = 5)
     plt.title('firing rate vs. input current')
@@ -760,14 +760,14 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
 def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for finding dominant term
     #IN
-    #float initCurrent: input current
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float resistance: R_m
-    #float vRest: rest voltage V_r
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
-    #float tRef: refractory time
+    #float initCurrent: input current in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float resistance: R_m in mΩ
+    #float vRest: rest voltage V_r in mV
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
+    #float tRef: refractory time in msec
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -789,7 +789,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     line.set_label('R_m * I')
     plt.xlabel('time (msec)')
     plt.ylabel('voltage (mV)')
-    plt.title('terms in LIF model when I = ' + str(initCurrent) + ' mA')
+    plt.title('terms in LIF model when I = ' + str(initCurrent) + ' μA')
     plt.legend(loc = 5)
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
@@ -800,16 +800,16 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
         TTX = False, pronase = False, VBase = -65, plotMHNFlag = False, fn_save = None):
     #for illustrating rebound spiking
     #IN
-    #list currentList: [float current]
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float gK: maximum conductance for K
-    #float gNa: maximum conductance for Na
-    #float gL: maximum conductance for other linear ions
-    #float VK: equilibrium potential for K
-    #flaot VNa: equilibrium potential for Na
-    #float VL: equilibrium potential for other linear ions
-    #float dt: simulation step size, msec
+    #list currentList: [float current] in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float gK: maximum conductance for K in mS
+    #float gNa: maximum conductance for Na in mS
+    #float gL: maximum conductance for other linear ions in mS
+    #float VK: equilibrium potential for K in mV
+    #flaot VNa: equilibrium potential for Na in mV
+    #float VL: equilibrium potential for other linear ions in mV
+    #float dt: simulation step size in msec
     #bool TTX: True: use drug TTX; False: not use
     #bool pronase: True: use drug pronase; False: not use
     #float VBase: baseline voltage
@@ -836,16 +836,16 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
 def EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for comparing firing rate of LIF with and without refractory time
     #IN
-    #float minCurrent: minimum input current
-    #float maxCurrent: maximum input current
-    #float currentStepSize: increasing step for input current
-    #float timeWindow: simulation time
-    #float capitance: C_m
-    #float resistance: R_m
-    #float vRest: rest voltage V_r
-    #float vThreshold: threshold voltage V_t
-    #float dt: simulation step size, msec
-    #float tRef: refractory time
+    #float minCurrent: minimum input current in μA
+    #float maxCurrent: maximum input current in μA
+    #float currentStepSize: increasing step for input current in μA
+    #float timeWindow: simulation time in msec
+    #float capitance: C_m in μF
+    #float resistance: R_m in kΩ
+    #float vRest: rest voltage V_r in mV
+    #float vThreshold: threshold voltage V_t in mV
+    #float dt: simulation step size in msec
+    #float tRef: refractory time in msec
     #str fn_save: file name; None: not save
 
 
@@ -884,7 +884,7 @@ def EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     line.set_label('LIF with refractory time')
     line, = plt.plot(currentList, rate4)
     line.set_label('IF with refractory time')
-    plt.xlabel('current (mA)')
+    plt.xlabel('current (μA)')
     plt.ylabel('firing rate (Hz)')
     plt.legend(loc = 4)
     plt.title('firing rate vs. input current')
