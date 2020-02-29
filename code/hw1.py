@@ -440,7 +440,7 @@ class HodgkinHuxley(object):
         return    
 
 
-def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True, fn_save = None):
+def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True, tRef = 0, fn_save = None):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -450,6 +450,7 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
+    #float tRef: refractory time
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -462,7 +463,7 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
         current[:, i] = currentList[i]
 
     #init LIF model
-    lif = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = leaky, tRef = tRef)
 
     #simulate and plot
     lif.simulate(current)
@@ -482,6 +483,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
     #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
+    #float tRef: refractory time
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -660,7 +662,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     return
 
 
-def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = None):
+def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for comparing membrane potential of IF and LIF
     #IN
     #float initCurrent: input current
@@ -670,6 +672,7 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #float tRef: refractory time
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -677,8 +680,8 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     current = np.full((stepNum, 1), initCurrent, dtype = np.float64)
 
     #init LIF and IF model
-    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
-    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = False)
+    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = True, tRef = tRef)
+    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = False, tRef = tRef)
 
     #simulate and plot
     v1, s1 = lif1.simulate(current)
@@ -704,7 +707,7 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.show()
     return
 
-def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = None):
+def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for comparing firing rate of IF and LIF
     #IN
     #float minCurrent: minimum input current
@@ -716,6 +719,7 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #float tRef: refractory time
     #str fn_save: file name; None: not save
 
 
@@ -730,8 +734,8 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
         current[:, i] = currentList[i]
 
     #init LIF and IF model
-    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
-    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = False)
+    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = True, tRef = tRef)
+    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = False, tRef = tRef)
 
     #simulate
     lif1.simulate(current)
@@ -753,7 +757,7 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     plt.show()
     return
 
-def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = None):
+def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
     #for finding dominant term
     #IN
     #float initCurrent: input current
@@ -763,6 +767,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #float tRef: refractory time
     #str fn_save: file name; None: not save
 
     #preprocessing
@@ -770,7 +775,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     current = np.full((stepNum, 1), initCurrent, dtype = np.float64)
 
     #init LIF
-    lif = LIF(capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = True, tRef = tRef)
 
     #simulate and plot
     v1, s1 = lif.simulate(current)
@@ -793,6 +798,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
 
 def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01,
         TTX = False, pronase = False, VBase = -65, plotMHNFlag = False, fn_save = None):
+    #for illustrating rebound spiking
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -827,6 +833,65 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
     HH.plot(currentList, halfInputFlag = True, plotMHNFlag = plotMHNFlag, fn_save = fn_save)
     return
 
+def EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = 0, fn_save = None):
+    #for comparing firing rate of LIF with and without refractory time
+    #IN
+    #float minCurrent: minimum input current
+    #float maxCurrent: maximum input current
+    #float currentStepSize: increasing step for input current
+    #float timeWindow: simulation time
+    #float capitance: C_m
+    #float resistance: R_m
+    #float vRest: rest voltage V_r
+    #float vThreshold: threshold voltage V_t
+    #float dt: simulation step size, msec
+    #float tRef: refractory time
+    #str fn_save: file name; None: not save
+
+
+    #preprocessing
+    stepNum = int(np.ceil(timeWindow / dt))
+    simulationNum = int(np.ceil((maxCurrent - minCurrent) / currentStepSize))
+    currentList = np.array(range(simulationNum), dtype = np.float64) * currentStepSize + minCurrent
+    
+    #init input current
+    current = np.empty((stepNum, simulationNum), dtype = np.float64)
+    for i in range(simulationNum):
+        current[:, i] = currentList[i]
+
+    #init LIF and IF model
+    lif1 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = True, tRef = 0)
+    lif2 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = False, tRef = 0)
+    lif3 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = True, tRef = tRef)
+    lif4 = LIF(capitance, resistance, vRest, vThreshold, dt = dt, leaky = False, tRef = tRef)
+
+    #simulate
+    lif1.simulate(current)
+    rate1 = lif1.getFiringNum() / timeWindow * 1000
+    lif2.simulate(current)
+    rate2 = lif2.getFiringNum() / timeWindow * 1000
+    lif3.simulate(current)
+    rate3 = lif3.getFiringNum() / timeWindow * 1000
+    lif4.simulate(current)
+    rate4 = lif4.getFiringNum() / timeWindow * 1000
+
+    #plot
+    line, = plt.plot(currentList, rate1)
+    line.set_label('LIF without refractory time')
+    line, = plt.plot(currentList, rate2)
+    line.set_label('IF without refractory time')
+    line, = plt.plot(currentList, rate3)
+    line.set_label('LIF with refractory time')
+    line, = plt.plot(currentList, rate4)
+    line.set_label('IF with refractory time')
+    plt.xlabel('current (mA)')
+    plt.ylabel('firing rate (Hz)')
+    plt.legend(loc = 4)
+    plt.title('firing rate vs. input current')
+    if fn_save is not None:
+        plt.savefig('../docs/plots/' + fn_save)
+    plt.show()
+    return
 
 if __name__ == '__main__':
     currentList = [0.3, 0.4, 0.5]
@@ -900,8 +965,8 @@ if __name__ == '__main__':
     fn_save = None
     Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, plotMHNFlag = True, fn_save = fn_save)
 
-    current = 2.7
-    timeWindow = 10
+    current = 0.27
+    timeWindow = 1000
     capitance = 1
     resistance = 20
     vRest = -65
@@ -940,3 +1005,15 @@ if __name__ == '__main__':
     VL = 10.6
     fn_save = None
     EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True, fn_save = fn_save)
+
+    minCurrent = 0.05
+    maxCurrent = 5
+    currentStepSize = 0.05
+    timeWindow = 3000
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    tRef = 5
+    fn_save = None
+    EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = tRef, fn_save = fn_save)
