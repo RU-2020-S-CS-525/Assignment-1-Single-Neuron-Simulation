@@ -56,10 +56,14 @@ class LIF(object):
         return self.voltage, self.spike
 
     def getFiringNum(self):
-        return np.sum(self.spike, axis = 0)
+        #OUT
+        #np.ndarray fireNum, dtype = np.float64, shape = (k, 1): the number of spikes
+        return np.sum(self.spike, axis = 0, dtype = np.float64)
 
-    def plot(self, currentList, fn_save=None):
+    def plot(self, currentList, fn_save = None):
+        #IN
         #list currentList: [float current]
+        #str fn_save: file name; None: not save
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
             print('E: too many currents')
@@ -149,10 +153,14 @@ class Izhikevich(object):
         return self.voltage, self.spike
 
     def getFiringNum(self):
-        return np.sum(self.spike, axis = 0)
+        #OUT
+        #np.ndarray fireNum, dtype = np.float64, shape = (k, 1): the number of spikes
+        return np.sum(self.spike, axis = 0, dtype = np.float64)
 
-    def plot(self, currentList):
+    def plot(self, currentList, fn_save = None):
+        #IN
         #list currentList: [float current]
+        #str fn_save: file name; None: not save
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
             print('E: too many currents')
@@ -168,6 +176,8 @@ class Izhikevich(object):
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('membrane potential and spiking behavior')
+        if fn_save is not None:
+            plt.savefig('../docs/plots/' + fn_save)
         plt.show()
         return
         
@@ -352,11 +362,12 @@ class HodgkinHuxley(object):
             tempN = self.parameterN[i]
         return self.voltage
 
-    def plot(self, currentList, halfInputFlag = False, plotMHNFlag = False):
+    def plot(self, currentList, halfInputFlag = False, plotMHNFlag = False, fn_save = None):
         #IN
         #list currentList: [float current]
         #bool halfInputFlag: change the title; True: plot for EX4, False: general plot
         #bool plotMHNFlag: True: plot parameter m h n; False: not plot
+        #str fn_save: file name; None: not save
         color = ['b', 'g', 'r', 'c', 'm', 'y']
         if self.simulationNum > len(color):
             print('E: too many currents')
@@ -373,6 +384,8 @@ class HodgkinHuxley(object):
             plt.title('membrane potential when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
         else:
             plt.title('membrane potential')
+        if fn_save is not None:
+            plt.savefig('../docs/plots/' + fn_save)
         plt.show()
 
         if plotMHNFlag:
@@ -414,7 +427,7 @@ class HodgkinHuxley(object):
         return    
 
 
-def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True):
+def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True, fn_save = None):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -423,7 +436,8 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
-    #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
+    #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -439,7 +453,7 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
 
     #simulate and plot
     lif.simulate(current)
-    lif.plot(currentList, 'plot_programming_1.png')
+    lif.plot(currentList, fn_save = fn_save)
     return
 
 def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
@@ -454,7 +468,8 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
-    #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
+    #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -470,7 +485,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
     lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky)
     #simulate
     lif.simulate(current)
-    rate = lif.getFiringNum() * 1000.0 / timeWindow
+    rate = lif.getFiringNum() / timeWindow * 1000
 
     #plot
     plt.plot(currentList, rate)
@@ -482,7 +497,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
     plt.show()
     return
 
-def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 30, dt = 0.01):
+def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 30, dt = 0.01, fn_save = None):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -492,6 +507,7 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 
     #float d: after-spike reset u
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -507,10 +523,11 @@ def Q4(currentList, timeWindow, a = 0.02, b = 0.2, c = -65, d = 8, vThreshold = 
 
     #simulate and plot
     izhikevich.simulate(current)
-    izhikevich.plot(currentList)
+    izhikevich.plot(currentList, fn_save = fn_save)
     return
 
-def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65, plotMHNFlag = False):
+def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, 
+       dt = 0.01, TTX = False, pronase = False, VBase = -65, plotMHNFlag = False, fn_save = None):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -526,6 +543,7 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #bool pronase: True: use drug pronase; False: not use
     #float VBase: baseline voltage
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -541,10 +559,10 @@ def Q5(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
 
     #simulate and plot
     HH.simulate(current)
-    HH.plot(currentList, plotMHNFlag)
+    HH.plot(currentList, plotMHNFlag, fn_save = fn_save)
     return
 
-def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, VBase = -65, plotMHNFlag = False):
+def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, VBase = -65, plotMHNFlag = False, fn_save = None):
     #IN
     #float initCurrent: input current
     #float timeWindow: simulation time, msec
@@ -558,6 +576,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     #float dt: simulation step size, msec
     #float VBase: baseline voltage
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -585,6 +604,8 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     plt.ylabel('voltage (mV)')
     plt.legend(loc = 5)
     plt.title('membrane potential when I = ' + str(initCurrent) + ' mA')
+    if fn_save is not None:
+        plt.savefig('../docs/plots/' + fn_save)
     plt.show()
 
     if plotMHNFlag:
@@ -626,7 +647,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     return
 
 
-def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01):
+def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = None):
     #for comparing membrane potential of IF and LIF
     #IN
     #float initCurrent: input current
@@ -636,6 +657,7 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -664,10 +686,12 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.ylabel('voltage (mV)')
     plt.title('membrane potential and spiking behavior when I = ' + str(initCurrent) + ' mA')
     plt.legend(loc = 5)
+    if fn_save is not None:
+        plt.savefig('../docs/plots/' + fn_save)
     plt.show()
     return
 
-def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01):
+def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = None):
     #for comparing firing rate of IF and LIF
     #IN
     #float minCurrent: minimum input current
@@ -679,6 +703,8 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #str fn_save: file name; None: not save
+
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -709,10 +735,12 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     plt.ylabel('firing rate (Hz)')
     plt.legend(loc = 5)
     plt.title('firing rate vs. input current')
+    if fn_save is not None:
+        plt.savefig('../docs/plots/' + fn_save)
     plt.show()
     return
 
-def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01):
+def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = None):
     #for finding dominant term
     #IN
     #float initCurrent: input current
@@ -722,6 +750,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     #float vRest: rest voltage V_r
     #float vThreshold: threshold voltage V_t
     #float dt: simulation step size, msec
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -744,10 +773,13 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.ylabel('voltage (mV)')
     plt.title('terms in LIF model when I = ' + str(initCurrent) + ' mA')
     plt.legend(loc = 5)
+    if fn_save is not None:
+        plt.savefig('../docs/plots/' + fn_save)
     plt.show()
     return
 
-def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01, TTX = False, pronase = False, VBase = -65, plotMHNFlag = False):
+def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK = -12, VNa = 115, VL = 10.6, dt = 0.01,
+        TTX = False, pronase = False, VBase = -65, plotMHNFlag = False, fn_save = None):
     #IN
     #list currentList: [float current]
     #float timeWindow: simulation time
@@ -763,6 +795,7 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
     #bool pronase: True: use drug pronase; False: not use
     #float VBase: baseline voltage
     #bool plotMHNFlag: True: plot parameter m h n; False: not plot
+    #str fn_save: file name; None: not save
 
     #preprocessing
     stepNum = int(np.ceil(timeWindow / dt))
@@ -778,7 +811,7 @@ def EX4(currentList, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK
 
     #simulate and plot
     HH.simulate(current)
-    HH.plot(currentList, halfInputFlag = True, plotMHNFlag = plotMHNFlag)
+    HH.plot(currentList, halfInputFlag = True, plotMHNFlag = plotMHNFlag, fn_save = fn_save)
     return
 
 
@@ -789,19 +822,22 @@ if __name__ == '__main__':
     resistance = 20
     vRest = -65
     vThreshold = 5
-    Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, leaky = True)
+    fn_save = 'plot_programming_1.tmp.png'
+    Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold,
+        dt = 0.01, leaky = True, fn_save = fn_save)
 
     minCurrent = 0.01
     maxCurrent = 3
     currentStepSize = 0.01
-    timeWindow = 1000
+    timeWindow = 10000
     capitance = 1
     resistance = 20
     vRest = -65
     vThreshold = 5
+    fn_save = 'plot_programming_2.tmp.png'
     Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
        resistance, vRest, vThreshold, dt = 0.01, leaky = True,
-       fn_save='plot_programming_2.png')
+       fn_save = fn_save)
 
     currentList = [4, 5, 6]
     timeWindow = 500
@@ -810,7 +846,8 @@ if __name__ == '__main__':
     c = -65
     d = 8
     vThreshold = 30
-    Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01)
+    fn_save = None
+    Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01, fn_save = fn_save)
 
     currentList = [-10, 2, 5, 9]
     timeWindow = 50
@@ -821,7 +858,8 @@ if __name__ == '__main__':
     VK = -12
     VNa = 115
     VL = 10.6
-    Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False)
+    fn_save = None
+    Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, fn_save = fn_save)
 
     current = 5
     timeWindow = 25
@@ -832,25 +870,28 @@ if __name__ == '__main__':
     VK = -12
     VNa = 115
     VL = 10.6
-    Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, plotMHNFlag = True)
+    fn_save = None
+    Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, plotMHNFlag = True, fn_save = fn_save)
 
-    current = 200
+    current = 2.7
     timeWindow = 10
     capitance = 1
     resistance = 20
     vRest = -65
     vThreshold = 5
-    EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    fn_save = None
+    EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
     
-    minCurrent = 0.1
+    minCurrent = 0.01
     maxCurrent = 3
-    currentStepSize = 0.1
-    timeWindow = 1000
+    currentStepSize = 0.01
+    timeWindow = 10000
     capitance = 1
     resistance = 20
     vRest = -65
     vThreshold = 5
-    EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    fn_save = None
+    EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
     
     current = 0.26
     timeWindow = 1000
@@ -858,7 +899,8 @@ if __name__ == '__main__':
     resistance = 20
     vRest = -65
     vThreshold = 5
-    EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01)
+    fn_save = None
+    EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
 
     currentList = [-9, 5, 9]
     timeWindow = 50
@@ -869,4 +911,5 @@ if __name__ == '__main__':
     VK = -12
     VNa = 115
     VL = 10.6
-    EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True)
+    fn_save = None
+    EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True, fn_save = fn_save)
