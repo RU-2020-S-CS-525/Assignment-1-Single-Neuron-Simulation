@@ -4,14 +4,15 @@ import matplotlib.pyplot as plt
 class LIF(object):
     #leaky integrate-and-fire model
     #C_m \frac{dV}{dt} = I(t) - frac{V_m (t)}{R_m}
-    def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold
-                 = 5, dt = 0.01, leaky = True, tRef = 0):
+    def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold = 5, 
+                 dt = 0.01, leaky = True, tRef = 0):
         #float capitance: C_m
         #float resistance: R_m
         #float vRest: rest voltage V_r
         #float vThreshold: threshold voltage V_t
         #float dt: simulation step size, msec
-        #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model 
+        #bool leaky: True: leaky integrate-and-fire model; False: leaky-free integrate-and-fire model
+        #float tRef: refractory time
         super(LIF, self).__init__()
         self.capitance = capitance
         self.resistance = resistance
@@ -20,19 +21,21 @@ class LIF(object):
         self.dt = dt
         self.leakyFactor = 1 if leaky else 0
         self.tRef = tRef
+        self.refStep = int(self.tRef / self.dt)
         return
 
     def _update(self, tempCurrent, tempVoltage, ref_mask):
         #IN
         #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input current
         #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potential
+        #np.ndarray ref_mask, dtype = np.float64, shape = (1, n): n different indicator; True: not in refractory time; False: in refractory time
         #OUT
-        #np.ndarray tempVoltage, dtype = np.float64, shpape = (1, n): updated membrance potential
-        #np.ndarray spike, dtype = np.bool, shpape = (1, n): True: fire; False: not fire
+        #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): updated membrance potential
+        #np.ndarray spike, dtype = np.bool, shape = (1, n): True: fire; False: not fire
 
         #dV = (I(t) - frac{v_m (t)}{R_m}) * dt / C_m
         dV = (tempCurrent - self.leakyFactor * tempVoltage / self.resistance) * self.dt / self.capitance
-        tempVoltage[:, ref_mask] = tempVoltage[:, ref_mask] + dV[:, ref_mask]
+        tempVoltage[ref_mask] = tempVoltage[ref_mask] + dV[ref_mask]
 
         #get spike and reset
         spike = tempVoltage >= self.vThreshold
@@ -51,12 +54,12 @@ class LIF(object):
         
         #init v
         tempVoltage = np.full((1, self.simulationNum), self.vRest, dtype = np.float64)
+        ref_mask = np.ones((1, self.simulationNum), dtype = np.bool)
         #loop
-        ref_mask = np.ones((self.simulationNum,), dtype=np.bool)
         for i in range(self.stepNum):
             if self.tRef > 0:
-                spiked = np.sum(self.spike[max(0,i-self.tRef):i], axis=0)
-                ref_mask = spiked == 0
+                spiked = np.sum(self.spike[max(0, i - self.refStep): i], axis = 0, keepdims = True)
+                ref_mask = (spiked == 0)
             self.voltage[i], self.spike[i] = self._update(current[i], tempVoltage, ref_mask)
             tempVoltage = self.voltage[i].reshape((1, self.simulationNum))
 
@@ -489,7 +492,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
         current[:, i] = currentList[i]
 
     #init LIF model
-    lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky, int(tRef/dt))
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky, tRef)
     #simulate
     lif.simulate(current)
     rate = lif.getFiringNum() / timeWindow * 1000
