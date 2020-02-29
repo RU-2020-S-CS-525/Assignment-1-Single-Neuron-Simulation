@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 class LIF(object):
     #leaky integrate-and-fire model
     #C_m \frac{dV}{dt} = I(t) - frac{V_m (t)}{R_m}
-    def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold = 5, dt = 0.01, leaky = True):
+    def __init__(self, capitance = 1, resistance = 20, vRest = -65, vThreshold
+                 = 5, dt = 0.01, leaky = True, tRef = 0):
         #float capitance: C_m
         #float resistance: R_m
         #float vRest: rest voltage V_r
@@ -18,9 +19,10 @@ class LIF(object):
         self.vRest = vRest
         self.dt = dt
         self.leakyFactor = 1 if leaky else 0
+        self.tRef = tRef
         return
 
-    def _update(self, tempCurrent, tempVoltage):
+    def _update(self, tempCurrent, tempVoltage, ref_mask):
         #IN
         #np.ndarray tempCurrent, dtype = np.float64, shape = (1, n): n different input current
         #np.ndarray tempVoltage, dtype = np.float64, shape = (1, n): n different membrance potential
@@ -30,7 +32,7 @@ class LIF(object):
 
         #dV = (I(t) - frac{v_m (t)}{R_m}) * dt / C_m
         dV = (tempCurrent - self.leakyFactor * tempVoltage / self.resistance) * self.dt / self.capitance
-        tempVoltage = tempVoltage + dV
+        tempVoltage[:, ref_mask] = tempVoltage[:, ref_mask] + dV[:, ref_mask]
 
         #get spike and reset
         spike = tempVoltage >= self.vThreshold
@@ -50,9 +52,14 @@ class LIF(object):
         #init v
         tempVoltage = np.full((1, self.simulationNum), self.vRest, dtype = np.float64)
         #loop
+        ref_mask = np.ones((self.simulationNum,), dtype=np.bool)
         for i in range(self.stepNum):
-            self.voltage[i], self.spike[i] = self._update(current[i], tempVoltage)
-            tempVoltage = self.voltage[i]
+            if self.tRef > 0:
+                spiked = np.sum(self.spike[max(0,i-self.tRef):i], axis=0)
+                ref_mask = spiked == 0
+            self.voltage[i], self.spike[i] = self._update(current[i], tempVoltage, ref_mask)
+            tempVoltage = self.voltage[i].reshape((1, self.simulationNum))
+
         return self.voltage, self.spike
 
     def getFiringNum(self):
@@ -457,7 +464,7 @@ def Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0
     return
 
 def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
-       resistance, vRest, vThreshold, dt = 0.01, leaky = True, fn_save = None):
+       resistance, vRest, vThreshold, dt = 0.01, leaky = True, tRef = 0, fn_save = None):
     #IN
     #float minCurrent: minimum input current
     #float maxCurrent: maximum input current
@@ -482,7 +489,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
         current[:, i] = currentList[i]
 
     #init LIF model
-    lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky)
+    lif = LIF(capitance, resistance, vRest, vThreshold, dt, leaky, int(tRef/dt))
     #simulate
     lif.simulate(current)
     rate = lif.getFiringNum() / timeWindow * 1000
@@ -822,7 +829,7 @@ if __name__ == '__main__':
     resistance = 20
     vRest = -65
     vThreshold = 5
-    fn_save = 'plot_programming_1.tmp.png'
+    fn_save = 'plot_programming_1.png'
     Q1(currentList, timeWindow, capitance, resistance, vRest, vThreshold,
         dt = 0.01, leaky = True, fn_save = fn_save)
 
@@ -834,9 +841,23 @@ if __name__ == '__main__':
     resistance = 20
     vRest = -65
     vThreshold = 5
-    fn_save = 'plot_programming_2.tmp.png'
+    fn_save = 'plot_programming_2.png'
     Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
-       resistance, vRest, vThreshold, dt = 0.01, leaky = True,
+       resistance, vRest, vThreshold, dt = 0.01, leaky = True, tRef = 0,
+       fn_save = fn_save)
+
+    minCurrent = 0.01
+    maxCurrent = 100
+    currentStepSize = 1
+    timeWindow = 1000
+    tRef = 5
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    fn_save = 'plot_programming_2_2.png'
+    Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
+       resistance, vRest, vThreshold, dt = 0.01, leaky = True, tRef = tRef,
        fn_save = fn_save)
 
     currentList = [4, 5, 6]
