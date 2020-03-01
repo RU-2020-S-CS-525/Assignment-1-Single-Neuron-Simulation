@@ -744,9 +744,9 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     rate2 = lif2.getFiringNum() / timeWindow * 1000
 
     #plot
-    line, = plt.plot(currentList, rate1)
+    line, = plt.plot(currentList, rate1, c = 'b')
     line.set_label('LIF')
-    line, = plt.plot(currentList, rate2)
+    line, = plt.plot(currentList, rate2, c = 'g')
     line.set_label('IF')
     plt.xlabel('current (μA)')
     plt.ylabel('firing rate (Hz)')
@@ -876,13 +876,13 @@ def EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     rate4 = lif4.getFiringNum() / timeWindow * 1000
 
     #plot
-    line, = plt.plot(currentList, rate1)
+    line, = plt.plot(currentList, rate1, c = 'b')
     line.set_label('LIF without refractory time')
-    line, = plt.plot(currentList, rate2)
+    line, = plt.plot(currentList, rate2, c = 'g')
     line.set_label('IF without refractory time')
-    line, = plt.plot(currentList, rate3)
+    line, = plt.plot(currentList, rate3, c = 'r')
     line.set_label('LIF with refractory time')
-    line, = plt.plot(currentList, rate4)
+    line, = plt.plot(currentList, rate4, c = 'c')
     line.set_label('IF with refractory time')
     plt.xlabel('current (μA)')
     plt.ylabel('firing rate (Hz)')
@@ -938,10 +938,10 @@ if __name__ == '__main__':
     c = -65
     d = 8
     vThreshold = 30
-    fn_save = None
+    fn_save = 'plot_programming_4.png'
     Q4(currentList, timeWindow, a, b, c, d, vThreshold, dt = 0.01, fn_save = fn_save)
 
-    currentList = [-10, 2, 5, 9]
+    currentList = [-9, 2, 5, 9, 100]
     timeWindow = 50
     capitance = 1
     gK = 36
@@ -950,7 +950,7 @@ if __name__ == '__main__':
     VK = -12
     VNa = 115
     VL = 10.6
-    fn_save = None
+    fn_save = 'plot_programming_5.png'
     Q5(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, fn_save = fn_save)
 
     current = 5
@@ -962,16 +962,25 @@ if __name__ == '__main__':
     VK = -12
     VNa = 115
     VL = 10.6
-    fn_save = None
+    fn_save = 'plot_programming_7.png'
     Q6(current, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, plotMHNFlag = True, fn_save = fn_save)
 
-    current = 0.27
-    timeWindow = 1000
+    current = 0.05
+    timeWindow = 5000
     capitance = 1
     resistance = 20
     vRest = -65
     vThreshold = 5
-    fn_save = None
+    fn_save = 'plot_question_1.png'
+    EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
+
+    current = 10
+    timeWindow = 100
+    capitance = 1
+    resistance = 20
+    vRest = -65
+    vThreshold = 5
+    fn_save = 'plot_question_2.png'
     EX1(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
     
     minCurrent = 0.01
@@ -982,7 +991,7 @@ if __name__ == '__main__':
     resistance = 20
     vRest = -65
     vThreshold = 5
-    fn_save = None
+    fn_save = 'plot_question_3.png'
     EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
     
     current = 0.26
@@ -994,7 +1003,7 @@ if __name__ == '__main__':
     fn_save = None
     EX3(current, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, fn_save = fn_save)
 
-    currentList = [-9, 5, 9]
+    currentList = [-9, 2, 5, 9, 100]
     timeWindow = 50
     capitance = 1
     gK = 36
@@ -1003,7 +1012,7 @@ if __name__ == '__main__':
     VK = -12
     VNa = 115
     VL = 10.6
-    fn_save = None
+    fn_save = 'plot_programming_6.png'
     EX4(currentList, timeWindow, capitance, gK, gNa, gL, VK, VNa, VL, dt = 0.01, TTX = False, pronase = False, plotMHNFlag = True, fn_save = fn_save)
 
     minCurrent = 0.05
@@ -1015,5 +1024,5 @@ if __name__ == '__main__':
     vRest = -65
     vThreshold = 5
     tRef = 5
-    fn_save = None
+    fn_save = 'plot_programming_2_2_2.png'
     EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistance, vRest, vThreshold, dt = 0.01, tRef = tRef, fn_save = fn_save)
