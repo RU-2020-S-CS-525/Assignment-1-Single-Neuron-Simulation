@@ -92,6 +92,7 @@ class LIF(object):
             plt.title('membrane potential and spiking behavior with refractory time = ' + str(self.tRef) + ' msec')
         else:
             plt.title('membrane potential and spiking behavior')
+        plt.tight_layout()
         if fn_save is not None:
             plt.savefig('../docs/plots/' + fn_save)
         plt.show()
@@ -189,6 +190,7 @@ class Izhikevich(object):
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('membrane potential and spiking behavior')
+        plt.tight_layout()
         if fn_save is not None:
             plt.savefig('../docs/plots/' + fn_save)
         plt.show()
@@ -397,6 +399,7 @@ class HodgkinHuxley(object):
             plt.title('membrane potential when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
         else:
             plt.title('membrane potential')
+        plt.tight_layout()
         if fn_save is not None:
             plt.savefig('../docs/plots/' + fn_save)
         plt.show()
@@ -412,6 +415,7 @@ class HodgkinHuxley(object):
                 plt.title('parameter m when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
             else:
                 plt.title('parameter m')
+            plt.tight_layout()
             plt.show()
 
             for i in range(self.simulationNum):
@@ -424,6 +428,7 @@ class HodgkinHuxley(object):
                 plt.title('parameter h when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
             else:
                 plt.title('parameter h')
+            plt.tight_layout()
             plt.show()
 
             for i in range(self.simulationNum):
@@ -436,6 +441,7 @@ class HodgkinHuxley(object):
                 plt.title('parameter n when input currents last for first ' + str(self.stepNum / 2 * self.dt) + ' msecs')
             else:
                 plt.title('parameter n')
+            plt.tight_layout()
             plt.show()
         return    
 
@@ -507,6 +513,7 @@ def Q2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance,
     plt.xlabel('current (μA)')
     plt.ylabel('firing rate (Hz)')
     plt.title('firing rate vs. input current')
+    plt.tight_layout()
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
     plt.show()
@@ -619,6 +626,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
     plt.ylabel('voltage (mV)')
     plt.legend(loc = 5)
     plt.title('membrane potential when I = ' + str(initCurrent) + ' μA')
+    plt.tight_layout()
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
     plt.show()
@@ -634,6 +642,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('parameter m when I = ' + str(initCurrent) + ' μA')
+        plt.tight_layout()
         plt.show()
 
         line, = plt.plot(time, HH0.parameterH[:, 0], c = 'b')
@@ -646,6 +655,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('parameter h when I = ' + str(initCurrent) + ' μA')
+        plt.tight_layout()
         plt.show()
 
         line, = plt.plot(time, HH0.parameterN[:, 0], c = 'b')
@@ -658,6 +668,7 @@ def Q6(initCurrent, timeWindow, capitance = 1, gK = 36, gNa = 120, gL = 0.3, VK 
         plt.ylabel('voltage (mV)')
         plt.legend(loc = 5)
         plt.title('parameter n when I = ' + str(initCurrent) + ' μA')
+        plt.tight_layout()
         plt.show()
     return
 
@@ -702,8 +713,10 @@ def EX1(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.ylabel('voltage (mV)')
     plt.title('membrane potential and spiking behavior when I = ' + str(initCurrent) + ' μA')
     plt.legend(loc = 5)
+    plt.tight_layout()
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
+    plt.tight_layout()
     plt.show()
     return
 
@@ -752,6 +765,7 @@ def EX2(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     plt.ylabel('firing rate (Hz)')
     plt.legend(loc = 5)
     plt.title('firing rate vs. input current')
+    plt.tight_layout()
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
     plt.show()
@@ -791,6 +805,7 @@ def EX3(initCurrent, timeWindow, capitance, resistance, vRest, vThreshold, dt = 
     plt.ylabel('voltage (mV)')
     plt.title('terms in LIF model when I = ' + str(initCurrent) + ' μA')
     plt.legend(loc = 5)
+    plt.tight_layout()
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
     plt.show()
@@ -888,6 +903,7 @@ def EX5(minCurrent, maxCurrent, currentStepSize, timeWindow, capitance, resistan
     plt.ylabel('firing rate (Hz)')
     plt.legend(loc = 4)
     plt.title('firing rate vs. input current')
+    plt.tight_layout()
     if fn_save is not None:
         plt.savefig('../docs/plots/' + fn_save)
     plt.show()
