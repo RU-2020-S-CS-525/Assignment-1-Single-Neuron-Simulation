@@ -58,8 +58,8 @@ class LIF(object):
         #loop
         for i in range(self.stepNum):
             if self.tRef > 0:
-                spiked = np.sum(self.spike[max(0, i - self.refStep): i], axis = 0, keepdims = True)
-                ref_mask = (spiked == 0)
+                spiked = np.any(self.spike[max(0, i - self.refStep): i], axis = 0, keepdims = True)
+                ref_mask = ~spiked
             self.voltage[i], self.spike[i] = self._update(current[i], tempVoltage, ref_mask)
             tempVoltage = self.voltage[i].reshape((1, self.simulationNum))
 
