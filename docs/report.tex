@@ -7,6 +7,8 @@
 \usepackage{subfigure}
 \usepackage{natbib}
 \usepackage[colorlinks]{hyperref}
+\usepackage{makecell}
+\usepackage[colorinlistoftodos]{todonotes}
 
 \graphicspath{{plots/}}
 
@@ -23,26 +25,39 @@
 \evensidemargin 0.0in \topmargin -0.55in
 \addtolength{\textwidth}{2.5mm} \addtolength{\columnsep}{2mm}
 
-\title{Report of assignment 1}
+\title{Report of Assignment 1}
 \author{Haoyang Zhang, Qi Wu, Shengjie Li}
 
-
 \begin{document}
+\date{\today}
 \maketitle
+
+    \section*{Group members and division of workload}
+    \begin{tabular}{| p{3cm} | p{\textwidth -4cm} |}
+    	\hline
+    	\makecell[c]{Name \\ NetID} & Workload \\
+    	\hline
+    	\makecell[c]{Haoyang Zhang \\ hz333} & {Independently implemented the leaky integrate-and-fire model, the Izhikevich model, the Hodgkin-Huxley model, and related plotting codes. Wrote answer for \textit{Programming \ref{P6}}.} \\
+    	\hline
+    	\makecell[c]{Qi Wu \\ qw142} & {Independently implemented the basic leaky integrate-and-fire model, the Izhikevich model, the Hodgkin-Huxley model. Wrote the report.} \\
+    	\hline
+    	\makecell[c]{Shengjie Li \\ sl1560} & {Implemented the feature of refractory period for LIF/IF model. Wrote answer for \textit{Programming \ref{q3}}.} \\
+    	\hline
+    \end{tabular}
 
 	\section*{Questions}
 	\begin{enumerate}
-		\item what do you expect to happen if an IF neuron is constantly fed a very low input current? An LIF neuron?
+		\item What do you expect to happen if an IF neuron is constantly fed a very low input current? An LIF neuron?
 		
 		IF: See Fig. \ref{fig:Fig1.sub.L}. Because the neuron continually integrates input, its membrane potential $V_m$ will constantly grow up. Finally, $V_m$ will reach the threshold $V_{threshold}$. Then, the neuron will fire and reset $V_m$.
 		
-		LIF: See Fig.\ref{fig:Fig1.sub.L}. At the beginning, because the input current $I$ is far smaller than $-V_m/R_m$, voltage is dominated by ``leak'' and will increase steeply from $V_{rest}$. Then, as voltage $V_m$ increasing, $-V_m/R_m$ will decrease and be close or equal to the input current $I$. Finally, $dV/dt$ will converge to 0, and $V_m$ will converge to $R_mI$. Because the input current $I$ is smaller than the threshold $V_{threshold}/R_m$, the voltage $V_m$ can not exceed the threshold $V_m/R_m$. Therefore, this neuron will never fire.
+		LIF: See Fig. \ref{fig:Fig1.sub.L}. At the beginning, because the input current $I$ is far smaller than $-V_m/R_m$, voltage is dominated by ``leak'' and will increase steeply from $V_{rest}$. Then, as voltage $V_m$ increases, $-V_m/R_m$ will decrease and will be close or equal to the input current $I$. Finally, $dV/dt$ will converge to 0, and $V_m$ will converge to $R_m I$. Because the input current $I$ is smaller than the threshold $V_{threshold}/R_m$, the voltage $V_m$ can not exceed the threshold $V_{threshold}$. Therefore, this neuron will never fire.
 		
-		\item what do you expect to happen if an IF neuron is constantly fed a large input current? An LIF neuron?
+		\item What do you expect to happen if an IF neuron is constantly fed a large input current? An LIF neuron?
 			
 		IF: See Fig. \ref{fig:Fig1.sub.H} and \ref{fig:Fig1.sub.I}. Because the input current is large, the derivative of voltage is also large. Therefore, neuron will fire and reset in a very high frequency.
 		
-		LIF: See Fig. \ref{fig:Fig1.sub.H}\ref{fig:Fig1.sub.I}. Because the input current $I$ is very large, the current ``leak'' can not counteract the input. Therefore, the membrane potential is dominated by input current, and the neuron has a similar performance as IF. However, LIF model still fire in a higher frequency than IF model. This is because the ``leak term'' $V_m/R_m$ accelerates the increasing of voltage when the voltage is negative.
+		LIF: See Fig. \ref{fig:Fig1.sub.H} and \ref{fig:Fig1.sub.I}. Because the input current $I$ is very large, the current ``leak'' cannot counteract the input. Therefore, the membrane potential is dominated by input current, and the neuron has a similar performance as IF. However, LIF model still fire in a higher frequency than IF model. This is because the ``leak term'' $V_m/R_m$ accelerates the increasing of voltage when the voltage is negative.
 				
 			\begin{figure}[htb]
 			\centering
@@ -60,22 +75,21 @@
 			
 		\item What are the limitations of an LIF neuron?
 			
-		The LIF neuron can't handle large input. See \ref{fig:Fig1.sub.I}, when the input current is large, the ``leak term'' of the LIF model lost its function, and LIF will have a similar performance as the IF. Namely, the firing rate increases linearly without bound as input current increases. But in reality, because of the refractory period in which the potential does not respond to stimuli, the firing rate is bounded. Also, this model does not describe the shape of spikes, which somehow implies that all spikes are the same. However, compared with Hodgkin–Huxley model and experiment results, we know spikes become weaker and weaker if we inject really large currents. (See Fig. \ref{fig:Fig4.sub.H-H} $I =$ 9 mA and $I =$ 100 mA.) Another issue comes from its leaky term. This term tends to push the potential back to zero instead of $V_{rest}$, which contradicts the ``rest'' potential.
+		The LIF neuron can't handle large input. As shown in Fig. \ref{fig:Fig1.sub.I}, when the input current is large, the ``leak term'' of the LIF model lost its function, and LIF will have a similar performance as the IF. Namely, the firing rate increases linearly without boundary as input current continue increases. But in reality, because of the refractory period in which the potential does not respond to stimuli, the firing rate is bounded. See Fig. \ref{fig:q2.fire_rate_ref}. Also, this model does not describe the shape of spikes, which somehow implies that all spikes are the same. However, compared with Hodgkin–Huxley model and experiment results, we know spikes become weaker and weaker if we inject really large currents. (See Fig. \ref{fig:Fig4.sub.H-H} $I = 9 \mu A$ and $I = 100 \mu A$.) Another issue comes from its leaky term. This term tends to push the potential back to zero instead of $V_{rest}$, which contradicts the ``rest'' potential.
 			
 	\end{enumerate}
 	
-	\section*{Programing}
+	\section*{Programming}
 	\begin{enumerate}
 		\item Simulate an LIF neuron with different input currents and plot the membrane potential, showing (a) potential decay over time and (b) spiking behavior.
 
         % \cite{Ermentrout_2010}
-		The parameters we use for the LIF neuron are: $V_{rest} = -65 mV$, $V_{threshold} = 5 mV$, $C_m = 1 \mu F$, and $R_m = 20 \Omega$. The results are shown in Fig. \ref{fig:q1-voltage}. We use dots to denote spiking behavior.
+		The parameters we use for the LIF neuron are: $V_{rest} = -65 mV$, $V_{threshold} = 5 mV$, $C_m = 1 \mu F$, and $R_m = 20 k\Omega$. The results are shown in Fig. \ref{fig:q1-voltage}. We use dots to denote spiking behavior.
 		
 		\begin{figure}[htb]
 			\centering
-			\label{fig:q1-voltage}
 			\includegraphics[width=.5\textwidth]{plot_programming_1.png}
-			\caption{Membrane potential and spiking behavior over time}
+			\caption{\label{fig:q1-voltage} Membrane potential and spiking behavior over time}
 		\end{figure}
 		
 		\item Plot the firing rate as a function of the input current.
@@ -87,25 +101,29 @@
 			\centering
 			\subfigure[LIF neuron without refractory period]{
     			\label{fig:q2.fire_rate}
-    			\includegraphics[width=0.48\textwidth]{plot_programming_2.png}
-    		}
+    			\includegraphics[width=0.32\textwidth]{plot_programming_2.png}}
 			\subfigure[LIF neuron with a refractory period of $5 ms$]{
-			\label{fig:q2.fire_rate_ref}
-			\includegraphics[width=0.48\textwidth]{plot_programming_2_2.png}}
+			    \label{fig:q2.fire_rate_ref}
+		    	\includegraphics[width=0.32\textwidth]{plot_programming_2_2.png}}
+			\subfigure[comparison between different models]{
+		    	\label{fig:q2.fire_rate_comparison}
+		    	\includegraphics[width=0.32\textwidth]{plot_programming_2_2_2.png}}
 			\caption{Firing rate vs. input current}
 			\label{fig:q2}
 		\end{figure}
 		
 		\item What happens to the firing rate as you continue to increase the input current? Why?
+		\label{q3}
 		
 		\begin{enumerate}
 		    \item {LIF neuron without refractory period}
 		    
-		    As shown in Fig. \ref{fig:q2.fire_rate}. When the input current is very small ($I < V_{threshold}/R_m$), the neuron doesn't fire. Then, as the current increase, the firing rate will increase steeply at the beginning. This is because ?. As input current increase, because the potential will be reset to $V_{rest}$ after firing, $R_mI$ will be far larger than $V_{threshold}$. In this case, the potential will be dominated by input current, and the firing rate will be linear correlation with input current.
+		    As shown in Fig. \ref{fig:q2.fire_rate}. When the input current is very small ($I < V_{threshold}/R_m$), the neuron doesn't fire. Then, as the current increases, the firing rate will increase steeply at the beginning. Because the potential will be reset to $V_{rest}$ after firing, $R_m I$ will be far larger than $V_{threshold}$ as the current continue increases. In this case, the potential will be dominated by input current, and the firing rate will be linear correlation with input current. This can be mathematically calculated by doing integration. The firing rate $ r = (R_m C_m \log\frac{R_m I}{R_m I - V_{threshold}})^{-1} $ \cite[pg. 93-100]{0521890799}.
 		    
-		    \item {LIF neuron with a refractory period $tRef = 5 ms$}
 		    
-		    When the input current is very small ($I < V_{threshold}/R_m$), the neuron doesn't fire (might not be clearly visible in the figure). But as the current increase, the firing rate will slowly converge to a specific value, as shown in Fig. \ref{fig:q2.fire_rate_ref}. This is because no matter how large the current is, the firing rate would not exceed $\frac{1}{tRef}$.
+		    \item {LIF neuron with a refractory period $t_{Ref} = 5 ms$}
+		    
+		    When the input current is very small ($I < V_{threshold}/R_m$), the neuron doesn't fire, as shown in Fig. \ref{fig:q2.fire_rate_comparison}. But as the current increases, the firing rate will slowly converge to a specific value, as shown in Fig. \ref{fig:q2.fire_rate_ref}. This is because no matter how large the current is, the firing rate would not exceed $\frac{1}{t_{Ref}}$.
 		\end{enumerate}
 		
 		
@@ -118,13 +136,13 @@
 		
 		\item Simulate a neuron using the Izhikevich model.
 		
-		The parameters we use are $a = 0.02$, $b - 0.2$, $c = -65$, $d = 8$, and $V_{threshold} = 30$. The results are shown in Fig. \ref{fig:Fig3.Izh}. 
+		The parameters we use are $a = 0.02$, $b = 0.2$, $c = -65$, $d = 8$, and $V_{threshold} = 30 mV$. The results are shown in Fig. \ref{fig:Fig3.Izh}. 
 		
 		\item Simulate a neuron using the Hodgkin-Huxley model.
 		
-		The parameters we use are $\bar{g}_K = 36$, $\bar{g}_{Na} = 120$, $\bar{g}_l = 0.3$, $V_k = -12$, $V_{na} = 115$, $V_l = 10.6$. The results are shown in Fig. \ref{fig:Fig4.sub.H-H} and \ref{fig:Fig4.sub.Neg_H-H}. 
+		The parameters we use are $\bar{g}_K = 36 mS$, $\bar{g}_{Na} = 120 mS$, $\bar{g}_l = 0.3 mS$, $V_k = -12 mV$, $V_{Na} = 115 mV$, $V_l = 10.6 mV$, and $C_m = 1 \mu F$. The results are shown in Fig. \ref{fig:Fig4.sub.H-H} and \ref{fig:Fig4.sub.Neg_H-H}. 
 		
-		An interesting phenomena is the rebound spike (Fig. \ref{fig:Fig4.sub.Neg_H-H}). After an inhibitory current $(I < 0)$ switched off, it emits a spike. 
+		An interesting phenomena is the rebound spike (Fig. \ref{fig:Fig4.sub.Neg_H-H}). After an inhibitory current $(I < 0)$ switched off, it emits a spike \cite[pg. 56-57]{0521890799}. 
 		
 		\begin{figure}[ht]
 			\centering
@@ -138,15 +156,16 @@
 		\end{figure}
 		
 		\item Assume that you administer a drug named TTX, which inhibits the sodium current. Simulate the effect that TTX would have on the neural firing. Do the same for another drug, pronase, which eliminated sodium inactivation.
+		\label{P6}
 		
 		\begin{enumerate}
 		    \item TTX:
 		
-    		Because TTX will inhibit the sodium current, sodium particle can not enter or exit the neuron. This situation is equal to closing all the sodium channel. Therefore, we can set 0 for $g_{Na}m^3h(V-V_{Na})$ to simulate the effect of TTX. See the green curve in \ref{fig:fig5}. Note that if we inject a large enough current abruptly, like 100 mA, the potential of this neuron will perform a spike-like curve. However, this is caused by the input current, which greatly breaks the equilibrium potential. Potassium channels take time to react to this large input current, and before potassium channels open, the input current integrates like a spike.
+    		Because TTX will inhibit the sodium current, sodium ions can not enter the neuron through sodium channels. This situation is equivalent to closing all the sodium channel. Therefore, we can set 0 for $g_{Na}m^3h(V-V_{Na})$ to simulate the effect of TTX. See the green curve in Fig. \ref{fig:fig5}. Note that if we inject a large enough current abruptly, like $100 \mu A$, the potential of this neuron will perform a spike-like curve. However, this is caused by the input current, which greatly breaks the equilibrium potential. Potassium channels take time to react to this large input current, and before potassium channels open, the input current integrates like a spike.
     		
     		\item Pronase:
 		
-    		According to the ball and chain inactivation, a sodium channel can be in three states: open, closed, or inactivated. Both closed and inactivated states inhibit the sodium current. Therefore, we can consider that the parameter $h$ describes the proportion of channels in the activated (open or closed) state, and $m$ describes the proportion of active channels in open state. Since Pronase eliminates the sodium inactivation, all channels will be in an activated state. Therefore, we can fix $h$ to 1 to simulate this effect. See the red curve in Fig. \ref{fig:fig5}. Notice that the potential will keep in a high value, which causes long-lasting firing.
+    		According to the ball and chain inactivation \cite[pg. 156-158]{kandel2012principles}, a sodium channel can be in three states: open, closed, or inactivated. Both closed and inactivated states inhibit the sodium current. Therefore, we can consider that the parameter $h$ describes the proportion of channels in the activated (open or closed) state, and $m$ describes the proportion of active channels in open state. Since Pronase eliminates the sodium inactivation, all channels will be in an activated state. Therefore, we can fix $h$ to 1 to simulate this effect. See the red curve in Fig. \ref{fig:fig5}. The potential will keep in a high value, which causes long-lasting firing.
     		
     		Notice that the derivative of $m$ is negative when the potential is relatively small. Therefore, to stop a long-lasting firing, a neuron have to inhibit sodium entering and keep potassium exiting. Sodium channels are directly blocked in the inactivated state regardless of its open/closed state, which helps to stop firing.
 		
